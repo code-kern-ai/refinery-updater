@@ -1,0 +1,33 @@
+#!/bin/bash
+trap "echo -ne '\nstopping container...' && docker stop updater-service > /dev/null 2>&1 && echo -ne '\t\t [done]\n'" EXIT
+
+HOST_IP=$(docker network inspect bridge --format='{{json .IPAM.Config}}' | grep -o '[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}\.[0-9]\{1,3\}' | tail -1)
+
+echo -ne 'stopping old container...'
+docker stop updater-service > /dev/null 2>&1
+echo -ne '\t [done]\n'
+
+echo -ne 'building container...'
+docker build -t updater-service-dev -f dev.Dockerfile . > /dev/null 2>&1
+echo -ne '\t\t [done]\n'
+
+echo -ne 'starting...'
+docker run -d --rm \
+--name updater-service \
+-p 7062:80 \
+-e S3_TARGET=AWS \
+-e S3_ENDPOINT_LOCAL=object-storage:9000 \
+-e S3_ACCESS_KEY=onetask \
+-e S3_SECRET_KEY=r6ywtR33!DMlaL*SUUdy \
+-e S3_AWS_ENDPOINT=s3.amazonaws.com \
+-e S3_AWS_REGION=eu-central-1 \
+-e S3_AWS_ACCESS_KEY=AKIASGYWCUDQPPEWEG5Z \
+-e S3_AWS_SECRET_KEY=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 \
+-e POSTGRES=postgresql://postgres:onetask@graphql-postgres:5432 \
+--mount type=bind,source="$(pwd)"/,target=/app \
+-v /var/run/docker.sock:/var/run/docker.sock \
+--network dev-setup_default \
+updater-service-dev > /dev/null 2>&1
+echo -ne '\t\t\t [done]\n'
+
+docker logs -f updater-service
