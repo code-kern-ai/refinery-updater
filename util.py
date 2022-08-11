@@ -1,5 +1,6 @@
 from upgrade_logic.version_codes import Version
 from upgrade_logic import version_v1 as v1
+from upgrade_logic import version_v1_1 as v1_1
 
 
 def upgrade_to_version(current_version: str, target_version: str):
@@ -43,6 +44,8 @@ def __upgrade_to(version: Version):
         print("Nothing to do here...")
     if version == Version.v1:
         v1.upgrade()
+    if version == Version.v1_1:
+        v1_1.upgrade()
 
 
-__version_codes = [Version.v0_4, Version.v0_4_1, Version.v0_5, Version.v0_6, Version.v1]
+__version_codes = [Version.v0_4, Version.v0_4_1, Version.v0_5, Version.v0_6, Version.v1, Version.v1_1]

@@ -7,6 +7,7 @@ class Version(Enum):
     v0_5 = "v0_5"
     v0_6 = "v0_6"
     v1 = "v1"
+    v1_1 = "v1_1"
     UNKNOWN = "UNKNOWN"
 
     @staticmethod
