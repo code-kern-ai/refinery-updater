@@ -27,6 +27,14 @@ def version_overview() -> List[Dict[str, str]]:
     return return_values, 200
 
 
+@app.get("/has_updates")
+def has_updates() -> bool:
+    session_token = general.get_ctx_token()
+    return_value = util.has_updates()
+    general.remove_and_refresh_session(session_token)
+    return return_value, 200
+
+
 class UpgradeToAWS(BaseModel):
     only_existing: bool
     remove_from_minio: bool

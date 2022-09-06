@@ -11,8 +11,8 @@ from upgrade_logic import base_logic
 def version_overview() -> List[Dict[str, str]]:
     current_version = app_version.get_all()
     if len(current_version) == 0:
-        print("version check before entry add --> shouldn't happen", flush=True)
-        return None
+        print("version check before entry add --> update to newest version", flush=True)
+        update_to_newest()
 
     if not check_db_uptodate():
         print("need to update db", flush=True)
@@ -34,6 +34,17 @@ def version_overview() -> List[Dict[str, str]]:
         }
         for x in current_version
     ]
+
+
+def has_updates() -> bool:
+    if not check_db_uptodate():
+        print("need to update db", flush=True)
+        check_has_newer_version()
+    current_version = app_version.get_all()
+    for db_entry in current_version:
+        if __remote_has_newer(db_entry.installed_version, db_entry.remote_version):
+            return True
+    return False
 
 
 def update_to_newest() -> None:
