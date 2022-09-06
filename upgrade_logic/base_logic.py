@@ -1,8 +1,8 @@
 from typing import List
-from .business_objects import general
+from .business_objects import general, neural_search
 
 
-__lookup_upgrade_bo = {"general": general}
+__lookup_upgrade_bo = {"general": general, "neural_search": neural_search}
 
 
 def loop_functions_between_version(
@@ -21,7 +21,12 @@ def loop_functions_between_version(
         if __function_is_relevant(function_version, current_version, target_version):
             print("found updatelogic for " + function_name, flush=True)
             func = bo_functions[function_name]
-            func()
+            success = func()
+            if not success:
+                print(
+                    "something went wrong with the update of " + function_name,
+                    flush=True,
+                )
 
 
 def __function_is_relevant(
