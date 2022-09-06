@@ -49,10 +49,7 @@ def update_to_newest() -> None:
         check_has_newer_version()
         current_version = app_version.get_all()
     for db_entry in current_version:
-        if (
-            __remote_has_newer(db_entry.installed_version, db_entry.remote_version)
-            and db_entry.remote_version
-        ):
+        if __remote_has_newer(db_entry.installed_version, db_entry.remote_version):
             base_logic.loop_functions_between_version(
                 db_entry.service.lower(),
                 db_entry.installed_version,

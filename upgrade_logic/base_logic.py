@@ -42,13 +42,11 @@ def __function_is_relevant(
 
 
 # v1 newer than v2 (e.g. 1.1.2 > 1.1.1)
-def is_newer(v1: str, v2: str, p=False) -> bool:
+def is_newer(v1: str, v2: str) -> bool:
     a = [int(x) for x in v1.split(".")]
     b = [int(x) for x in v2.split(".")]
     if len(a) != len(b) and len(a) != 3:
         raise Exception("invalid version format")
-    if p:
-        print(a, b)
     return __is_newer_int(a, b)
 
 
