@@ -1,48 +1,111 @@
-from upgrade_logic.version_codes import Version
-from upgrade_logic import version_v1 as v1
+from datetime import datetime
+from upgrade_logic.business_objects import initial_db_version
+from typing import Any, List, Dict, Union
+
+from submodules.model.business_objects import app_version, general
+from service_overview import Service, check_db_uptodate, get_services_info
+import git
+from upgrade_logic import base_logic
 
 
-def upgrade_to_version(current_version: str, target_version: str):
-    current_version = Version.from_str(current_version)
-    target_version = Version.from_str(target_version)
+def version_overview() -> List[Dict[str, str]]:
+    current_version = app_version.get_all()
+    if len(current_version) == 0:
+        print("version check before entry add --> shouldn't happen")
+        return None
 
-    if current_version == Version.UNKNOWN or target_version == Version.UNKNOWN:
-        print("Can't parse version code -- abort")
-        return 400  # Bad Request
-    if current_version not in __version_codes or target_version not in __version_codes:
-        print("Can't match version code -- abort")
-        return 404  # Not found
-    if current_version == target_version:
-        print("current = target --> no upgrade needed")
-        return 405  # method not allowed
+    if not check_db_uptodate():
+        print("need to update db", flush=True)
+        check_has_newer_version()
+        current_version = app_version.get_all()
 
-    now_upgrading = False
-    for version in __version_codes:
-        if not now_upgrading and version != current_version:
-            # skip till we are at the current version
-            continue
-        if version == current_version:
-            now_upgrading = True
-        else:
-            __upgrade_to(version)
-        if version == target_version:
-            break
-
-    return 200
-
-
-def __upgrade_to(version: Version):
-    print("upgrade to:", version.value)
-    if version == Version.v0_4:
-        print("Nothing to do here...")
-    if version == Version.v0_4_1:
-        print("Nothing to do here...")
-    if version == Version.v0_5:
-        print("Nothing to do here...")
-    if version == Version.v0_6:
-        print("Nothing to do here...")
-    if version == Version.v1:
-        v1.upgrade()
+    lookup_dict = get_services_info(False)
+    return [
+        {
+            "name": lookup_dict[Service[x.service]]["name"],
+            "link": lookup_dict[Service[x.service]]["link"],
+            "public_repo": lookup_dict[Service[x.service]]["public_repo"],
+            "installed_version": x.installed_version,
+            "remote_version": x.remote_version,
+            "remote_has_newer": __remote_has_newer(
+                x.installed_version, x.remote_version
+            ),
+            "last_checked": x.last_checked,
+        }
+        for x in current_version
+    ]
 
 
-__version_codes = [Version.v0_4, Version.v0_4_1, Version.v0_5, Version.v0_6, Version.v1]
+def update_to_newest() -> None:
+    something_updated = False
+    current_version = app_version.get_all()
+    if len(current_version) == 0:
+        print("No version found in database -> assuming < 1.2.0")
+        initial_db_version.upgrade()
+        something_updated = True
+        current_version = app_version.get_all()
+    if not check_db_uptodate():
+        print("checking remote", flush=True)
+        check_has_newer_version()
+        current_version = app_version.get_all()
+    for db_entry in current_version:
+        if (
+            __remote_has_newer(db_entry.installed_version, db_entry.remote_version)
+            and db_entry.remote_version
+        ):
+            base_logic.loop_functions_between_version(
+                db_entry.service.lower(),
+                db_entry.installed_version,
+                db_entry.remote_version,
+            )
+            db_entry.installed_version = db_entry.remote_version
+            something_updated = True
+    if something_updated:
+        general.commit()
+    return something_updated
+
+
+def check_has_newer_version() -> bool:
+    current_version = app_version.get_all()
+    if len(current_version) == 0:
+        print("version check before entry add --> shouldn't happen")
+        return False
+    lookup_dict = get_services_info(True)
+    diff_version = False
+    for db_entry in current_version:
+        x = Service[db_entry.service]
+        if x in lookup_dict:
+            link = lookup_dict[x]["link"]
+            remote_version = __last_tag(link)
+            db_entry.last_checked = datetime.now()
+            db_entry.remote_version = remote_version
+            if __remote_has_newer(db_entry.installed_version, remote_version):
+                diff_version = True
+                print(
+                    "newer version found for "
+                    + db_entry.service
+                    + " (used: "
+                    + db_entry.installed_version
+                    + ", remote: "
+                    + remote_version
+                    + ")"
+                )
+
+    general.commit()
+    return diff_version
+
+
+def __last_tag(repo_link: str) -> Any:
+    g = git.cmd.Git()
+    blob = g.ls_remote(repo_link, sort="-v:refname", tags=True)
+    tag = blob.split("\n")[0].split("/")[-1]
+    if tag[0] == "v":
+        return tag[1:]
+    return tag
+
+
+def __remote_has_newer(installed: str, remote: Union[str, None]) -> bool:
+    if remote is None:
+        return None
+
+    return base_logic.is_newer(remote, installed)

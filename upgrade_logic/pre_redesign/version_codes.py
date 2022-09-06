@@ -2,11 +2,9 @@ from enum import Enum
 
 
 class Version(Enum):
-    v0_4 = "v0_4"
-    v0_4_1 = "v0_4_1"
-    v0_5 = "v0_5"
-    v0_6 = "v0_6"
     v1 = "v1"
+    v1_1 = "v1_1"
+    v1_2 = "v1_2"
     UNKNOWN = "UNKNOWN"
 
     @staticmethod
