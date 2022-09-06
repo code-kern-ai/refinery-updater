@@ -1,6 +1,6 @@
 from typing import List, Dict
 
-from fastapi import FastAPI
+from fastapi import FastAPI, responses
 from pydantic import BaseModel
 from submodules.model.business_objects import general
 import util
@@ -28,10 +28,12 @@ def version_overview() -> List[Dict[str, str]]:
 
 
 @app.get("/has_updates")
-def has_updates() -> bool:
+def has_updates(as_html_response: bool = False) -> bool:
     session_token = general.get_ctx_token()
     return_value = util.has_updates()
     general.remove_and_refresh_session(session_token)
+    if as_html_response:
+        return responses.HTMLResponse(content=str(return_value))
     return return_value, 200
 
 
