@@ -117,3 +117,7 @@ def __remote_has_newer(installed: str, remote: Union[str, None]) -> bool:
         return None
 
     return base_logic.is_newer(remote, installed)
+
+
+def helper_function(function_name: str) -> bool:    
+    return base_logic.call_function_by_name(function_name)
