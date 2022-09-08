@@ -2,6 +2,7 @@ from typing import List
 from .business_objects import general, neural_search
 
 
+# if a new business object file is introduced it needes to be added here
 __lookup_upgrade_bo = {"general": general, "neural_search": neural_search}
 
 

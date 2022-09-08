@@ -1,8 +1,3 @@
-# atm all upgrade functions are in this file. In the future it might make sense to structure them around the services
-
-
-def authorizer_1_2_1()->bool:
-    print("authorizer_1_2_1 function as example --> nothing changed", flush=True)
-    return True
-
-
+# function name tamplate: <service_name>_<version_with_underscore>
+# example: update logic for service AUTHORIZER for version 1.2.2 would be def authorizer_1_2_2()->bool:
+# should always return True if update logic was successful
