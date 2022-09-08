@@ -54,3 +54,11 @@ def migrate_minio_to_aws(request: UpgradeToAWS) -> int:
 @app.post("/helper")
 def helper() -> int:
     pass
+
+
+@app.post("/helper_function")
+def helper_function(function_name: str) -> bool:
+    session_token = general.get_ctx_token()
+    return_value = util.helper_function(function_name)
+    general.remove_and_refresh_session(session_token)
+    return return_value, 200

@@ -63,3 +63,15 @@ def __is_newer_int(v1: List[int], v2: List[int]) -> bool:
         elif v2[idx] < v1[idx]:
             return True
     return False
+
+
+def call_function_by_name(function_name: str) -> bool:
+    f_lookup = {}
+    for key in __lookup_upgrade_bo:
+        for f in dir(__lookup_upgrade_bo[key]):
+            f_lookup[f] = getattr(__lookup_upgrade_bo[key], f)
+    if function_name in f_lookup:
+        print("running function " + function_name, flush=True)
+        return f_lookup[function_name]()
+    print("function " + function_name + " not found", flush=True)
+    return False
