@@ -9,7 +9,7 @@ app = FastAPI()
 
 
 @app.post("/update_to_newest")
-def update_to_newest() -> int:
+def update_to_newest() -> str:
     session_token = general.get_ctx_token()
     if util.update_to_newest():
         msg = "updated to newest version"
@@ -54,6 +54,3 @@ def migrate_minio_to_aws(request: UpgradeToAWS) -> int:
 @app.post("/helper")
 def helper() -> int:
     pass
-    # util.check_has_newer_version()
-    # loop_functions_between_version("authorizer", "1.0.0", "1.1.0")
-    # test_me()
