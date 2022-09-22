@@ -6,8 +6,8 @@ import re
 from submodules.model.business_objects import attribute, embedding, general
 
 
-def gateway_1_2_1() -> bool:
-    print("update gateway to 1.2.1", flush=True)
+def gateway_1_3_0() -> bool:
+    print("update gateway to 1.3.0", flush=True)
     # fills attribute id column for existing embeddings
     embedding_items = embedding.get_all_embeddings()
     for i, embedding_item in enumerate(embedding_items):
@@ -22,7 +22,7 @@ def gateway_1_2_1() -> bool:
         if (i + 1) % 100 == 0:
             general.flush_or_commit(True)
     general.flush_or_commit(True)
-    print("updated gateway to 1.2.1", flush=True)
+    print("updated gateway to 1.3.0", flush=True)
     return True
 
 
