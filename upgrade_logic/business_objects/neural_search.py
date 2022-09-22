@@ -1,4 +1,3 @@
-
 import os
 import requests
 
@@ -8,13 +7,13 @@ from submodules.model.business_objects import embedding
 NEURAL_SEARCH = os.getenv("NEURAL_SEARCH")
 
 
-def neural_search_1_2_1()->bool:
-    print("upgrade qdrant version, recreate collections",flush=True)
+def neural_search_1_2_1() -> bool:
+    print("upgrade qdrant version, recreate collections", flush=True)
     success = __recreate_qdrant_collections()
     if success:
-        print("Recreated all collections.",flush=True)
+        print("Recreated all collections.", flush=True)
     else:
-        print("Recreating collections failed.",flush=True)
+        print("Recreating collections failed.", flush=True)
     return success
 
 
@@ -43,7 +42,7 @@ def __recreate_qdrant_collections() -> bool:
     response = requests.put(url=url_missing_collections)
 
     if response.status_code != 200 and response.status_code != 412:
-        print(response.content,flush=True)
+        print(response.content, flush=True)
         success = False
 
     return success
