@@ -5,6 +5,7 @@ from submodules.model.business_objects import attribute, embedding, user, genera
 def gateway_1_3_0() -> bool:
     __gateway_1_3_0_add_engineer()
     __gateway_1_3_0_add_attribute_for_embedding()
+    __gateway_1_3_0_add_attribute_default_state()
     return True
 
 
@@ -50,3 +51,19 @@ def __gateway_1_3_0_add_attribute_for_embedding() -> bool:
 def __get_attribute_name_from_embedding_name(embedding_name: str) -> str:
     regex = "^(.+)-(?:classification|extraction).*"
     return re.match(regex, embedding_name).group(1)
+
+
+def __gateway_1_3_0_add_attribute_default_state() -> bool:
+    print("add UPLOADED state to existing attributes", flush=True)
+    attributes = attribute.get_all(None, None)
+    something_changed = False
+    for a in attributes:
+        if not a.state:
+            a.state = "UPLOADED"
+            something_changed = True
+    if something_changed:
+        general.commit()
+        print("Added state.", flush=True)
+    else:
+        print("Nothing changed", flush=True)
+    return something_changed
