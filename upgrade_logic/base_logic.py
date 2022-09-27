@@ -1,4 +1,5 @@
 from typing import List
+<<<<<<< HEAD
 from .business_objects import general, neural_search, gateway
 
 
@@ -8,6 +9,13 @@ __lookup_upgrade_bo = {
     "neural_search": neural_search,
     "gateway": gateway,
 }
+=======
+from .business_objects import general, neural_search
+
+
+# if a new business object file is introduced it needes to be added here
+__lookup_upgrade_bo = {"general": general, "neural_search": neural_search}
+>>>>>>> origin/release
 
 
 def loop_functions_between_version(
