@@ -12,7 +12,7 @@ app = FastAPI()
 def update_to_newest() -> str:
     session_token = general.get_ctx_token()
     if util.update_to_newest():
-        msg = "updated to newest version"
+        msg = "updated to current version"
     else:
         msg = "nothing to update"
     general.remove_and_refresh_session(session_token)
