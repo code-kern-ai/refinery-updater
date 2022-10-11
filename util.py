@@ -71,6 +71,7 @@ def update_to_newest() -> None:
                 db_entry.installed_version,
                 db_entry.remote_version,
             )
+            # version is overwritten in alfred start up procedure
             db_entry.installed_version = db_entry.remote_version
             something_updated = True
     if something_updated:
