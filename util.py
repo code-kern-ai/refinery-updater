@@ -11,7 +11,9 @@ from upgrade_logic import base_logic
 def version_overview() -> List[Dict[str, str]]:
     current_version = app_version.get_all()
     if len(current_version) == 0:
-        print("version check before entry add --> update to newest version", flush=True)
+        print(
+            "version check before entry add --> update to current version", flush=True
+        )
         update_to_newest()
 
     if not check_db_uptodate():
@@ -51,7 +53,10 @@ def update_to_newest() -> None:
     something_updated = False
     current_version = app_version.get_all()
     if len(current_version) == 0:
-        print("No version found in database -> assuming < 1.2.0", flush=True)
+        print(
+            "No version found in database -> assuming new installation or version < 1.2.0",
+            flush=True,
+        )
         initial_db_version.upgrade()
         something_updated = True
         current_version = app_version.get_all()
@@ -66,6 +71,7 @@ def update_to_newest() -> None:
                 db_entry.installed_version,
                 db_entry.remote_version,
             )
+            # version is overwritten in alfred start up procedure
             db_entry.installed_version = db_entry.remote_version
             something_updated = True
     if something_updated:
@@ -119,5 +125,5 @@ def __remote_has_newer(installed: str, remote: Union[str, None]) -> bool:
     return base_logic.is_newer(remote, installed)
 
 
-def helper_function(function_name: str) -> bool:    
+def helper_function(function_name: str) -> bool:
     return base_logic.call_function_by_name(function_name)

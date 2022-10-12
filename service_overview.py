@@ -5,6 +5,7 @@ from submodules.model.business_objects import app_version
 
 
 class Service(Enum):
+    AC_EXEC_ENV = "AC_EXEC_ENV"
     ADMIN_DASHBOARD = "ADMIN_DASHBOARD"
     AUTHORIZER = "AUTHORIZER"
     CONFIG = "CONFIG"
@@ -29,6 +30,11 @@ class Service(Enum):
 
 
 __service_lookup = {
+    Service.AC_EXEC_ENV: {
+        "name": "AC Exec Env",
+        "link": "https://github.com/code-kern-ai/refinery-ac-exec-env",
+        "public_repo": True,
+    },
     Service.ADMIN_DASHBOARD: {
         "name": "Admin Dashboard",
         "link": "https://github.com/code-kern-ai/admin-dashboard",
