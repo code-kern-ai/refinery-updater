@@ -1,6 +1,9 @@
-FROM python:3.10
+FROM python:3.10-slim
 
 WORKDIR /program
+
+RUN apt update
+RUN apt install -y git
 
 COPY requirements.txt .
 
