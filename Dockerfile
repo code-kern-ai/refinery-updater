@@ -1,13 +1,14 @@
-FROM python:3.10-slim
+FROM kernai/refinery-parent-images:v1.5.0-common
 
 WORKDIR /program
 
-RUN apt update
-RUN apt install -y git
+RUN apt-get update && \
+    apt-get install --no-install-recommends -y git && \
+    rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
 
-RUN pip3 install -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements.txt
 
 COPY / .
 
