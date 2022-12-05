@@ -1,6 +1,17 @@
 import re
 from submodules.model.business_objects import attribute, embedding, user, general
 
+def gateway_1_6_1() -> bool:
+    __gateway_1_3_0_add_engineer()
+    __gateway_1_3_0_add_attribute_for_embedding()
+    __gateway_1_3_0_add_attribute_default_state()
+    return True
+
+
+def __gateway_1_6_1_add_attribute_visibility() -> bool:
+    pass
+    # logic for upadting attributes to have a visibility set to default
+
 
 def gateway_1_3_0() -> bool:
     __gateway_1_3_0_add_engineer()
