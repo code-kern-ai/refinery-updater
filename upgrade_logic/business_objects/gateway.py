@@ -1,16 +1,20 @@
 import re
 from submodules.model.business_objects import attribute, embedding, user, general
+from submodules.model import enums
 
 def gateway_1_6_1() -> bool:
-    __gateway_1_3_0_add_engineer()
-    __gateway_1_3_0_add_attribute_for_embedding()
-    __gateway_1_3_0_add_attribute_default_state()
+    __gateway_1_6_1_add_attribute_visibility()
     return True
 
 
 def __gateway_1_6_1_add_attribute_visibility() -> bool:
-    pass
-    # logic for upadting attributes to have a visibility set to default
+    sql = f"""
+    UPDATE attribute
+    SET visibility = '{enums.AttributeVisibility.DO_NOT_HIDE.value}'
+    WHERE visibility IS NULL
+    """
+    general.execute_sql(sql)
+    return True
 
 
 def gateway_1_3_0() -> bool:
