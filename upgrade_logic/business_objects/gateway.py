@@ -14,6 +14,7 @@ def __gateway_1_6_1_add_attribute_visibility() -> bool:
     WHERE visibility IS NULL
     """
     general.execute_sql(sql)
+    general.commit()
     return True
 
 
