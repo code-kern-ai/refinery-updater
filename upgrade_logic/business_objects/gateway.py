@@ -13,12 +13,12 @@ def __gateway_1_6_1_add_attribute_visibility() -> bool:
         f"Set visibility of attributes to value {enums.AttributeVisibility.DO_NOT_HIDE.value}",
         flush=True,
     )
-    count = general.execute(
+    (count,) = general.execute(
         """SELECT COUNT(id)
     FROM attribute
     WHERE visibility IS NULL
     """
-    )
+    ).first()
 
     if count > 0:
         general.execute(
