@@ -1,5 +1,39 @@
 import re
 from submodules.model.business_objects import attribute, embedding, user, general
+from submodules.model import enums
+
+
+def gateway_1_6_1() -> bool:
+    __gateway_1_6_1_add_attribute_visibility()
+    return True
+
+
+def __gateway_1_6_1_add_attribute_visibility() -> bool:
+    print(
+        f"Set visibility of attributes to value {enums.AttributeVisibility.DO_NOT_HIDE.value}",
+        flush=True,
+    )
+    count = general.execute_sql(
+        """SELECT COUNT(id)
+    FROM attribute
+    WHERE visibility IS NULL
+    """
+    )
+
+    if count > 0:
+        general.execute_sql(
+            f"""
+        UPDATE attribute
+        SET visibility = '{enums.AttributeVisibility.DO_NOT_HIDE.value}'
+        WHERE visibility IS NULL
+        """
+        )
+        general.commit()
+        print(f"Set value to {count} attributes.", flush=True)
+    else:
+        print("Nothing changed", flush=True)
+
+    return True
 
 
 def gateway_1_3_0() -> bool:
