@@ -43,10 +43,10 @@ def has_updates() -> bool:
         print("need to update db", flush=True)
         check_has_newer_version()
     current_version = app_version.get_all()
-    for db_entry in current_version:
-        if __remote_has_newer(db_entry.installed_version, db_entry.remote_version):
-            return True
-    return False
+    return any(
+        __remote_has_newer(db_entry.installed_version, db_entry.remote_version)
+        for db_entry in current_version
+    )
 
 
 def update_to_newest() -> None:

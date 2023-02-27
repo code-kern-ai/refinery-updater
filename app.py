@@ -1,6 +1,7 @@
-from typing import List, Dict
+from typing import List, Dict, Any
 
-from fastapi import FastAPI, responses
+from fastapi import FastAPI, responses, status
+from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from submodules.model.business_objects import general
 import util
@@ -16,15 +17,18 @@ def update_to_newest() -> str:
     else:
         msg = "nothing to update"
     general.remove_and_refresh_session(session_token)
-    return msg, 200
+    return responses.PlainTextResponse(status_code=status.HTTP_200_OK, content=msg)
 
 
 @app.get("/version_overview")
-def version_overview() -> List[Dict[str, str]]:
+def version_overview() -> List[Dict[str, Any]]:
     session_token = general.get_ctx_token()
     return_values = util.version_overview()
     general.remove_and_refresh_session(session_token)
-    return return_values, 200
+    return responses.JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=jsonable_encoder(return_values),
+    )
 
 
 @app.get("/has_updates")
@@ -34,7 +38,10 @@ def has_updates(as_html_response: bool = False) -> bool:
     general.remove_and_refresh_session(session_token)
     if as_html_response:
         return responses.HTMLResponse(content=str(return_value))
-    return return_value, 200
+    return responses.JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=return_value,
+    )
 
 
 class UpgradeToAWS(BaseModel):
@@ -61,4 +68,7 @@ def helper_function(function_name: str) -> bool:
     session_token = general.get_ctx_token()
     return_value = util.helper_function(function_name)
     general.remove_and_refresh_session(session_token)
-    return return_value, 200
+    return responses.JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=return_value,
+    )
