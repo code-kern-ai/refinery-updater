@@ -10,7 +10,7 @@ app = FastAPI()
 
 
 @app.post("/update_to_newest")
-def update_to_newest() -> str:
+def update_to_newest() -> responses.PlainTextResponse:
     session_token = general.get_ctx_token()
     if util.update_to_newest():
         msg = "updated to current version"
@@ -21,7 +21,7 @@ def update_to_newest() -> str:
 
 
 @app.get("/version_overview")
-def version_overview() -> List[Dict[str, Any]]:
+def version_overview() -> responses.JSONResponse:
     session_token = general.get_ctx_token()
     return_values = util.version_overview()
     general.remove_and_refresh_session(session_token)
@@ -32,7 +32,7 @@ def version_overview() -> List[Dict[str, Any]]:
 
 
 @app.get("/has_updates")
-def has_updates(as_html_response: bool = False) -> bool:
+def has_updates(as_html_response: bool = False) -> responses.JSONResponse:
     session_token = general.get_ctx_token()
     return_value = util.has_updates()
     general.remove_and_refresh_session(session_token)
@@ -64,7 +64,7 @@ def helper() -> int:
 
 
 @app.post("/helper_function")
-def helper_function(function_name: str) -> bool:
+def helper_function(function_name: str) -> responses.JSONResponse:
     session_token = general.get_ctx_token()
     return_value = util.helper_function(function_name)
     general.remove_and_refresh_session(session_token)
