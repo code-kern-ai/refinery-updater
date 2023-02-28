@@ -9,32 +9,38 @@ app = FastAPI()
 
 
 @app.post("/update_to_newest")
-def update_to_newest() -> str:
+def update_to_newest() -> responses.PlainTextResponse:
     session_token = general.get_ctx_token()
     if util.update_to_newest():
         msg = "updated to current version"
     else:
         msg = "nothing to update"
     general.remove_and_refresh_session(session_token)
-    return msg, 200
+    return responses.PlainTextResponse(status_code=status.HTTP_200_OK, content=msg)
 
 
 @app.get("/version_overview")
-def version_overview() -> List[Dict[str, str]]:
+def version_overview() -> responses.JSONResponse:
     session_token = general.get_ctx_token()
     return_values = util.version_overview()
     general.remove_and_refresh_session(session_token)
-    return return_values, 200
+    return responses.JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=jsonable_encoder(return_values),
+    )
 
 
 @app.get("/has_updates")
-def has_updates(as_html_response: bool = False) -> bool:
+def has_updates(as_html_response: bool = False) -> responses.JSONResponse:
     session_token = general.get_ctx_token()
     return_value = util.has_updates()
     general.remove_and_refresh_session(session_token)
     if as_html_response:
         return responses.HTMLResponse(content=str(return_value))
-    return return_value, 200
+    return responses.JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=return_value,
+    )
 
 
 class UpgradeToAWS(BaseModel):
@@ -57,7 +63,7 @@ def helper() -> int:
 
 
 @app.post("/helper_function")
-def helper_function(function_name: str) -> bool:
+def helper_function(function_name: str) -> responses.JSONResponse:
     session_token = general.get_ctx_token()
     return_value = util.helper_function(function_name)
     general.remove_and_refresh_session(session_token)
