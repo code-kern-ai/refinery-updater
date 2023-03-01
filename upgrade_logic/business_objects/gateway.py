@@ -1,7 +1,25 @@
 import re
-from submodules.model.business_objects import attribute, embedding, user, general
+from submodules.model.business_objects import attribute, embedding, user, general, organization
 from submodules.model import enums
 
+def gateway_1_8_1() -> bool:
+    __gateway_1_8_1_add_organization_limits()
+    return True
+
+def __gateway_1_8_1_add_organization_limits() -> bool:
+    print(
+        f"Add default limit for organizations",
+        flush=True,
+    )   
+    general.execute(
+        """
+        UPDATE organization
+        SET max_rows = 50000, max_cols = 25, max_char_count = 100000
+    """
+    )
+    print("Added default limit for organizations", flush=True)
+
+    return True
 
 def gateway_1_6_1() -> bool:
     __gateway_1_6_1_add_attribute_visibility()
