@@ -1,9 +1,9 @@
 from typing import List, Dict
-
-from fastapi import FastAPI, responses
+from fastapi import FastAPI, responses, status
 from pydantic import BaseModel
 from submodules.model.business_objects import general
 import util
+import config_handler
 
 app = FastAPI()
 
@@ -62,3 +62,9 @@ def helper_function(function_name: str) -> bool:
     return_value = util.helper_function(function_name)
     general.remove_and_refresh_session(session_token)
     return return_value, 200
+
+
+@app.put("/config_changed")
+def config_changed() -> responses.PlainTextResponse:
+    config_handler.refresh_config()
+    return responses.PlainTextResponse(status_code=status.HTTP_200_OK)
