@@ -26,18 +26,18 @@ def __gateway_1_8_1_add_organization_limits() -> bool:
         max_cols = get_config_value("max_cols") or 25
         max_char_count = get_config_value("max_char_count") or 100000
 
-        print(
-            f"Add default limit for organizations",
-            flush=True,
-        )
-        general.execute(
-            f"""
-            UPDATE organization
-            SET max_rows = {max_rows}, max_cols = {max_cols}, max_char_count = {max_char_count}
-            WHERE max_rows IS NULL
-        """
-        )
-        print("Added default limit for organizations", flush=True)
+    print(
+        f"Add default limit for organizations",
+        flush=True,
+    )
+    general.execute(
+        f"""
+        UPDATE organization
+        SET max_rows = {max_rows}, max_cols = {max_cols}, max_char_count = {max_char_count}
+        WHERE max_rows IS NULL
+    """
+    )
+    print("Added default limit for organizations", flush=True)
 
     return True
 
