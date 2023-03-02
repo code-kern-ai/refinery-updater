@@ -1,25 +1,46 @@
 import re
-from submodules.model.business_objects import attribute, embedding, user, general, organization
+from config_handler import get_config_value
+from submodules.model.business_objects import (
+    attribute,
+    embedding,
+    user,
+    general,
+    organization,
+)
 from submodules.model import enums
+
 
 def gateway_1_8_1() -> bool:
     __gateway_1_8_1_add_organization_limits()
     return True
 
+
 def __gateway_1_8_1_add_organization_limits() -> bool:
-    print(
-        f"Add default limit for organizations",
-        flush=True,
-    )   
-    general.execute(
+    is_managed = get_config_value("is_managed")
+    if is_managed:
+        max_rows = 50000
+        max_cols = 25
+        max_char_count = 100000
+    else:
+        max_rows = get_config_value("max_rows") or 50000
+        max_cols = get_config_value("max_cols") or 25
+        max_char_count = get_config_value("max_char_count") or 100000
+
+        print(
+            f"Add default limit for organizations",
+            flush=True,
+        )
+        general.execute(
+            f"""
+            UPDATE organization
+            SET max_rows = {max_rows}, max_cols = {max_cols}, max_char_count = {max_char_count}
+            WHERE max_rows IS NULL
         """
-        UPDATE organization
-        SET max_rows = 50000, max_cols = 25, max_char_count = 100000
-    """
-    )
-    print("Added default limit for organizations", flush=True)
+        )
+        print("Added default limit for organizations", flush=True)
 
     return True
+
 
 def gateway_1_6_1() -> bool:
     __gateway_1_6_1_add_attribute_visibility()
