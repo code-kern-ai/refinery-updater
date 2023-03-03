@@ -1,10 +1,9 @@
-from typing import List, Dict, Any
-
+from typing import List, Dict
 from fastapi import FastAPI, responses, status
-from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from submodules.model.business_objects import general
 import util
+import config_handler
 
 app = FastAPI()
 
@@ -72,3 +71,9 @@ def helper_function(function_name: str) -> responses.JSONResponse:
         status_code=status.HTTP_200_OK,
         content=return_value,
     )
+
+
+@app.put("/config_changed")
+def config_changed() -> responses.PlainTextResponse:
+    config_handler.refresh_config()
+    return responses.PlainTextResponse(status_code=status.HTTP_200_OK)
