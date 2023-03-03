@@ -67,7 +67,10 @@ def helper_function(function_name: str) -> responses.JSONResponse:
     session_token = general.get_ctx_token()
     return_value = util.helper_function(function_name)
     general.remove_and_refresh_session(session_token)
-    return return_value, 200
+    return responses.JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=return_value,
+    )
 
 
 @app.put("/config_changed")
