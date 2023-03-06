@@ -37,6 +37,7 @@ def __gateway_1_8_1_add_organization_limits() -> bool:
         WHERE max_rows IS NULL
     """
     )
+    general.commit()
     print("Added default limit for organizations", flush=True)
 
     return True
