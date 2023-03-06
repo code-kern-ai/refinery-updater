@@ -10,12 +10,12 @@ from submodules.model.business_objects import (
 from submodules.model import enums
 
 
-def gateway_1_8_1() -> bool:
+def gateway_1_8_0() -> bool:
     __gateway_1_8_1_add_organization_limits()
     return True
 
 
-def __gateway_1_8_1_add_organization_limits() -> bool:
+def __gateway_1_8_0_add_organization_limits() -> bool:
     is_managed = get_config_value("is_managed")
     if is_managed:
         max_rows = 50000
