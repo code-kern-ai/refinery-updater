@@ -1,6 +1,5 @@
 from typing import Dict, Any, Optional, Union
 import requests
-import json
 import time
 import daemon
 
@@ -34,7 +33,7 @@ def get_config_value(
 ) -> Union[str, Dict[str, str]]:
     config = __get_config()
     if key not in config:
-        raise ValueError(f"Key {key} coudn't be found in config")
+        return None
     value = config[key]
 
     if not subkey:
@@ -43,7 +42,7 @@ def get_config_value(
     if isinstance(value, dict) and subkey in value:
         return value[subkey]
     else:
-        raise ValueError(f"Subkey {subkey} coudn't be found in config[{key}]")
+        return None
 
 
 def invalidate_after(sec: int) -> None:
