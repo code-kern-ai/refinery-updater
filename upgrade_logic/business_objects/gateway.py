@@ -5,7 +5,6 @@ from submodules.model.business_objects import (
     embedding,
     user,
     general,
-    organization,
 )
 from submodules.model import enums
 
@@ -27,7 +26,7 @@ def __gateway_1_8_1_add_organization_limits() -> bool:
         max_char_count = get_config_value("max_char_count") or 100000
 
     print(
-        f"Add default limit for organizations",
+        "Add default limit for organizations",
         flush=True,
     )
     general.execute(
