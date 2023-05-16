@@ -1,4 +1,6 @@
 from typing import List
+
+from submodules.model.business_objects import app_version
 from .business_objects import general, neural_search, gateway
 
 
@@ -79,3 +81,13 @@ def call_function_by_name(function_name: str) -> bool:
         return f_lookup[function_name]()
     print("function " + function_name + " not found", flush=True)
     return False
+
+
+# function only sets the versions, not the update login in between
+def update_versions_to_newest() -> None:
+    services = app_version.get_all()
+    for service in services:
+        if service.installed_version != service.remote_version:
+            app_version.update(
+                service.service, service.remote_version, with_commit=True
+            )
