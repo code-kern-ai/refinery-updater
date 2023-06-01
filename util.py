@@ -28,7 +28,9 @@ def version_overview() -> List[Dict[str, str]]:
             "link": lookup_dict[Service[x.service]]["link"],
             "public_repo": lookup_dict[Service[x.service]]["public_repo"],
             "installed_version": x.installed_version,
-            "remote_version": x.remote_version,
+            "remote_version": x.remote_version
+            if x.remote_version != "0.0.0"
+            else "unknown",
             "remote_has_newer": __remote_has_newer(
                 x.installed_version, x.remote_version
             ),
@@ -113,7 +115,7 @@ def __last_tag(repo_link: str) -> Any:
     g = git.cmd.Git()
     blob = g.ls_remote(repo_link, sort="-v:refname", tags=True)
     if len(blob) == 0:
-        return "unknown"
+        return "0.0.0"
     tag = blob.split("\n")[0].split("/")[-1]
     if tag[0] == "v":
         return tag[1:]
