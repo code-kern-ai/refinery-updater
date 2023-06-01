@@ -113,7 +113,7 @@ def __last_tag(repo_link: str) -> Any:
     g = git.cmd.Git()
     blob = g.ls_remote(repo_link, sort="-v:refname", tags=True)
     if len(blob) == 0:
-        return "0.0.0"
+        return "unknown"
     tag = blob.split("\n")[0].split("/")[-1]
     if tag[0] == "v":
         return tag[1:]
