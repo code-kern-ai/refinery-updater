@@ -139,11 +139,9 @@ def helper_function(function_name: str) -> bool:
 
 
 def check_if_version_exists(installed: str, remote: str, is_remote: bool) -> str:
+    if "0.0.0" in [installed, remote]:
+        return "unknown"
     if is_remote:
-        if remote == "0.0.0":
-            return "unknown"
         return remote
     else:
-        if installed == "0.0.0":
-            return "unknown"
         return installed
