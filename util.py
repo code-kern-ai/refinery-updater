@@ -27,10 +27,12 @@ def version_overview() -> List[Dict[str, str]]:
             "name": lookup_dict[Service[x.service]]["name"],
             "link": lookup_dict[Service[x.service]]["link"],
             "public_repo": lookup_dict[Service[x.service]]["public_repo"],
-            "installed_version": x.installed_version,
-            "remote_version": x.remote_version
-            if x.remote_version != "0.0.0"
-            else "unknown",
+            "installed_version": check_if_version_exists(
+                x.installed_version, x.remote_version, False
+            ),
+            "remote_version": check_if_version_exists(
+                x.installed_version, x.remote_version, True
+            ),
             "remote_has_newer": __remote_has_newer(
                 x.installed_version, x.remote_version
             ),
@@ -112,14 +114,17 @@ def check_has_newer_version() -> bool:
 
 
 def __last_tag(repo_link: str) -> Any:
-    g = git.cmd.Git()
-    blob = g.ls_remote(repo_link, sort="-v:refname", tags=True)
-    if len(blob) == 0:
+    try:
+        g = git.cmd.Git()
+        blob = g.ls_remote(repo_link, sort="-v:refname", tags=True)
+        if len(blob) == 0:
+            return "0.0.0"
+        tag = blob.split("\n")[0].split("/")[-1]
+        if tag[0] == "v":
+            return tag[1:]
+        return tag
+    except Exception as e:
         return "0.0.0"
-    tag = blob.split("\n")[0].split("/")[-1]
-    if tag[0] == "v":
-        return tag[1:]
-    return tag
 
 
 def __remote_has_newer(installed: str, remote: Union[str, None]) -> bool:
@@ -131,3 +136,14 @@ def __remote_has_newer(installed: str, remote: Union[str, None]) -> bool:
 
 def helper_function(function_name: str) -> bool:
     return base_logic.call_function_by_name(function_name)
+
+
+def check_if_version_exists(installed: str, remote: str, is_remote: bool) -> str:
+    if is_remote:
+        if remote == "0.0.0":
+            return "unknown"
+        return remote
+    else:
+        if installed == "0.0.0":
+            return "unknown"
+        return installed
