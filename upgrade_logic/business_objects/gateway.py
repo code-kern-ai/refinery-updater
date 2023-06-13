@@ -15,14 +15,13 @@ def gateway_1_10_1() -> bool:
 
 
 def __gateway_1_10_1_add_additional_embedding_information() -> bool:
-
     def __transform_embedding_by_name(embedding_name: str):
         splitted_name = embedding_name.split("-")
         attribute_name = splitted_name[0]
         embedding_type = splitted_name[1]
         model = "-".join(splitted_name[2:])
-        if "bag-of-words" == model or "bag-of-characters" == model or "tf-idf" == model: 
-            platform= enums.EmbeddingPlatform.PYTHON.value
+        if "bag-of-words" == model or "bag-of-characters" == model or "tf-idf" == model:
+            platform = enums.EmbeddingPlatform.PYTHON.value
         else:
             platform = enums.EmbeddingPlatform.HUGGINGFACE.value
         name = f"{attribute_name}-{embedding_type}-{platform}-{model}"
@@ -35,6 +34,8 @@ def __gateway_1_10_1_add_additional_embedding_information() -> bool:
     embeddings = embedding.get_all_embeddings()
     idx = 0
     for embedding_item in embeddings:
+        if embedding_item.platform:
+            continue
         idx += 1
         platform, model, name = __transform_embedding_by_name(embedding_item.name)
         embedding_item.platform = platform
@@ -45,7 +46,7 @@ def __gateway_1_10_1_add_additional_embedding_information() -> bool:
     print(f"Added new embedding information for {idx} records", flush=True)
 
     return True
-    
+
 
 def gateway_1_8_1() -> bool:
     __gateway_1_8_1_add_organization_limits()
