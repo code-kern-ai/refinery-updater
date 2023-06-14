@@ -43,7 +43,7 @@ def __gateway_1_10_1_add_additional_embedding_information() -> bool:
         embedding_item.name = name
 
     general.commit()
-    print(f"Added new embedding information for {idx} records", flush=True)
+    print(f"Updated information for {idx} embeddings", flush=True)
 
     return True
 
