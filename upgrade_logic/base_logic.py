@@ -1,7 +1,7 @@
 from typing import List
 
-from submodules.model.business_objects import app_version
-from .business_objects import general, neural_search, gateway
+from submodules.model.business_objects import app_version, general
+from .business_objects import neural_search, gateway
 
 
 # if a new business object file is introduced it needes to be added here
@@ -83,11 +83,13 @@ def call_function_by_name(function_name: str) -> bool:
     return False
 
 
-# function only sets the versions, not the update login in between
+# function only sets the versions in the database, not the actual update logic
 def update_versions_to_newest() -> None:
-    services = app_version.get_all()
-    for service in services:
-        if service.installed_version != service.remote_version:
-            app_version.update(
-                service.service, service.remote_version, with_commit=True
-            )
+    general.execute(
+        f"""
+        UPDATE app_version
+        SET installed_version = remote_version
+        WHERE installed_version != remote_version
+        """
+    )
+    general.commit()
