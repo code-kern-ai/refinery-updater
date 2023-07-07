@@ -92,3 +92,11 @@ def healthcheck() -> responses.PlainTextResponse:
     if not text:
         text = "OK"
     return responses.PlainTextResponse(text, status_code=status_code)
+
+
+@app.post("/update_versions_to_newest")
+def update_versions_to_newest() -> responses.PlainTextResponse:
+    session_token = general.get_ctx_token()
+    util.update_versions_to_newest()
+    general.remove_and_refresh_session(session_token)
+    return responses.PlainTextResponse(status_code=status.HTTP_200_OK)

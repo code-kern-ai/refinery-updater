@@ -138,6 +138,10 @@ def helper_function(function_name: str) -> bool:
     return base_logic.call_function_by_name(function_name)
 
 
+def update_versions_to_newest() -> None:
+    base_logic.update_versions_to_newest()
+
+
 def check_if_version_exists(installed: str, remote: str, is_remote: bool) -> str:
     if "0.0.0" in [installed, remote]:
         return "unknown"

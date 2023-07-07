@@ -1,5 +1,7 @@
 from typing import List
-from .business_objects import general, neural_search, gateway
+
+from submodules.model.business_objects import app_version, general
+from .business_objects import neural_search, gateway
 
 
 # if a new business object file is introduced it needes to be added here
@@ -79,3 +81,15 @@ def call_function_by_name(function_name: str) -> bool:
         return f_lookup[function_name]()
     print("function " + function_name + " not found", flush=True)
     return False
+
+
+# function only sets the versions in the database, not the actual update logic
+def update_versions_to_newest() -> None:
+    general.execute(
+        f"""
+        UPDATE app_version
+        SET installed_version = remote_version
+        WHERE installed_version != remote_version
+        """
+    )
+    general.commit()
