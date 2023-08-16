@@ -7,6 +7,37 @@ from submodules.model.business_objects import embedding
 NEURAL_SEARCH = os.getenv("NEURAL_SEARCH")
 
 
+def neural_search_1_12_0() -> bool:
+    __neural_search_1_12_0_update_qdrant()
+    return True
+
+
+def __neural_search_1_12_0_update_qdrant() -> bool:
+    print("upgrade qdrant version, recreate collections", flush=True)
+    success = True
+
+    # only recreate collections, no need to create missing collections
+    embedding_items = embedding.get_finished_attribute_embeddings()
+
+    url_recreate = f"{NEURAL_SEARCH}/recreate_collection"
+    for project_id, embedding_id in embedding_items:
+        params = {
+            "project_id": str(project_id),
+            "embedding_id": str(embedding_id),
+        }
+        response = requests.post(url=url_recreate, params=params)
+
+        if response.status_code != 200:
+            print(response.content)
+            success = False
+
+    if success:
+        print("Recreated all collections.", flush=True)
+    else:
+        print("Recreating collections failed.", flush=True)
+    return success
+
+
 def neural_search_1_2_1() -> bool:
     print("upgrade qdrant version, recreate collections", flush=True)
     success = __recreate_qdrant_collections()
@@ -18,7 +49,6 @@ def neural_search_1_2_1() -> bool:
 
 
 def __recreate_qdrant_collections() -> bool:
-
     success = True
 
     # recreate collections
