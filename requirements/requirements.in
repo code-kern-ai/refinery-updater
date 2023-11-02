@@ -1,2 +1,2 @@
 -r common-requirements.txt
-GitPython==3.1.35
+GitPython==3.1.40
