@@ -36,7 +36,7 @@ fastapi==0.110.0
     # via -r requirements/common-requirements.txt
 gitdb==4.0.9
     # via gitpython
-gitpython==3.1.40
+gitpython==3.1.42
     # via -r requirements/requirements.in
 h11==0.14.0
     # via
