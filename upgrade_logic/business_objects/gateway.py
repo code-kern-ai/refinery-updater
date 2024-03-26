@@ -1,4 +1,6 @@
+import os
 import re
+import requests
 from config_handler import get_config_value
 from submodules.model.business_objects import (
     attribute,
@@ -7,6 +9,46 @@ from submodules.model.business_objects import (
     general,
 )
 from submodules.model import enums
+
+
+def gateway_1_14_0() -> bool:
+    # here, we update data for cognition using the gateway pattern
+    # as the corresponding database updates (alembic) are managed using the refinery gateway it is
+    # ensured that these updates are executed at the correct time
+    gateway_1_14_0_add_cognition_project_state()
+    gateway_1_14_0_add_cognition_strategy_complexity()
+    return True
+
+
+def gateway_1_14_0_add_cognition_project_state() -> bool:
+    query = f"""
+    UPDATE cognition.project
+    SET state = '{enums.CognitionProjectState.PRODUCTION.value}'
+    WHERE state IS NULL
+    """
+    general.execute(query)
+    general.commit()
+    return True
+
+
+def gateway_1_14_0_add_cognition_strategy_complexity() -> bool:
+    cognition_url = os.getenv("COGNITION_GATEWAY")
+    if not cognition_url:
+        print(
+            "No cognition gateway url found. Skipping cognition strategy complexity update."
+        )
+        return False
+
+    response = requests.post(
+        f"{cognition_url}/api/v1/strategies/internal/calculate_missing_complexities"
+    )
+    if response.status_code != 200:
+        print(
+            f"Failed to update cognition strategy complexities. Status code: {response.status_code}"
+        )
+        return False
+
+    return True
 
 
 def gateway_1_10_1() -> bool:
