@@ -16,6 +16,7 @@ def gateway_1_15_0() -> bool:
     # as the corresponding database updates (alembic) are managed using the refinery gateway it is
     # ensured that these updates are executed at the correct time
     __gateway_1_15_0_add_cognition_project_file_defaults()
+    __gateway_1_15_0_add_cognition_conversation_file_defaults()
     return True
 
 
@@ -25,6 +26,18 @@ def __gateway_1_15_0_add_cognition_project_file_defaults() -> bool:
     SET max_file_size_mb = 3,
         allow_file_upload = FALSE
     WHERE max_file_size_mb IS NULL
+    """
+    general.execute(query)
+    general.commit()
+    return True
+
+
+def __gateway_1_15_0_add_cognition_conversation_file_defaults() -> bool:
+    query = """
+    UPDATE cognition.conversation
+    SET has_tmp_files = FALSE,
+        archived = FALSE
+    WHERE has_tmp_files IS NULL
     """
     general.execute(query)
     general.commit()
