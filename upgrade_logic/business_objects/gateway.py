@@ -17,6 +17,7 @@ def gateway_1_15_0() -> bool:
     # ensured that these updates are executed at the correct time
     __gateway_1_15_0_add_cognition_project_file_defaults()
     __gateway_1_15_0_add_cognition_conversation_file_defaults()
+    __gateway_1_15_0_remove_cognition_step_type_relevance()
     return True
 
 
@@ -38,6 +39,15 @@ def __gateway_1_15_0_add_cognition_conversation_file_defaults() -> bool:
     SET has_tmp_files = FALSE,
         archived = FALSE
     WHERE has_tmp_files IS NULL
+    """
+    general.execute(query)
+    general.commit()
+    return True
+
+
+def __gateway_1_15_0_remove_cognition_step_type_relevance() -> bool:
+    query = """
+    DELETE FROM cognition.strategy_step WHERE step_type = 'RELEVANCE'
     """
     general.execute(query)
     general.commit()
