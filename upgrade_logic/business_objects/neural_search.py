@@ -14,7 +14,7 @@ def neural_search_1_15_0() -> bool:
 
 def neural_search_1_15_0_delete_all_tf_idf_embeddings() -> bool:
     # previous tf-idf embeddings didn't do anything useful so we can just delete them
-    # Note that tensors are deleted by cascading
+    # used fixed values instead of enum keys to ensure changes dont break
     query = "SELECT id FROM embedding WHERE platform = 'python' AND model = 'tf-idf'"
     embedding_ids = general.execute_all(query)
     if len(embedding_ids) > 0:
@@ -27,11 +27,12 @@ def neural_search_1_15_0_delete_all_tf_idf_embeddings() -> bool:
                 print(
                     f"Error deleting tf-idf embedding {embedding_id[0]} from qdrant: {e}"
                 )
-                return False
 
+        # Note that tensors are deleted by cascading
         query = "DELETE FROM embedding WHERE platform = 'python' AND model = 'tf-idf'"
         general.execute(query)
         general.commit()
+    return True
 
 
 def neural_search_1_12_0() -> bool:
