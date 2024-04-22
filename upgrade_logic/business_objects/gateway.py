@@ -12,45 +12,8 @@ from submodules.model import enums
 
 
 def gateway_1_15_0() -> bool:
-    # here, we update data for cognition using the gateway pattern
-    # as the corresponding database updates (alembic) are managed using the refinery gateway it is
-    # ensured that these updates are executed at the correct time
-    __gateway_1_15_0_add_cognition_project_file_defaults()
-    __gateway_1_15_0_add_cognition_conversation_file_defaults()
-    __gateway_1_15_0_remove_cognition_step_type_relevance()
-    return True
-
-
-def __gateway_1_15_0_add_cognition_project_file_defaults() -> bool:
-    query = """
-    UPDATE cognition.project
-    SET max_file_size_mb = 3,
-        allow_file_upload = FALSE
-    WHERE max_file_size_mb IS NULL
-    """
-    general.execute(query)
-    general.commit()
-    return True
-
-
-def __gateway_1_15_0_add_cognition_conversation_file_defaults() -> bool:
-    query = """
-    UPDATE cognition.conversation
-    SET has_tmp_files = FALSE,
-        archived = FALSE
-    WHERE has_tmp_files IS NULL
-    """
-    general.execute(query)
-    general.commit()
-    return True
-
-
-def __gateway_1_15_0_remove_cognition_step_type_relevance() -> bool:
-    query = """
-    DELETE FROM cognition.strategy_step WHERE step_type = 'RELEVANCE'
-    """
-    general.execute(query)
-    general.commit()
+    # Note: A previous version had the previous update listed as v1.15.
+    # That was false, the updates already ran through. This is now for the actual 1.15 release
     return True
 
 
@@ -60,6 +23,9 @@ def gateway_1_14_0() -> bool:
     # ensured that these updates are executed at the correct time
     gateway_1_14_0_add_cognition_project_state()
     gateway_1_14_0_add_cognition_strategy_complexity()
+    __gateway_1_14_0_add_cognition_project_file_defaults()
+    __gateway_1_14_0_add_cognition_conversation_file_defaults()
+    __gateway_1_14_0_remove_cognition_step_type_relevance()
     return True
 
 
@@ -91,6 +57,39 @@ def gateway_1_14_0_add_cognition_strategy_complexity() -> bool:
         )
         return False
 
+    return True
+
+
+def __gateway_1_14_0_add_cognition_project_file_defaults() -> bool:
+    query = """
+    UPDATE cognition.project
+    SET max_file_size_mb = 3,
+        allow_file_upload = FALSE
+    WHERE max_file_size_mb IS NULL
+    """
+    general.execute(query)
+    general.commit()
+    return True
+
+
+def __gateway_1_14_0_add_cognition_conversation_file_defaults() -> bool:
+    query = """
+    UPDATE cognition.conversation
+    SET has_tmp_files = FALSE,
+        archived = FALSE
+    WHERE has_tmp_files IS NULL
+    """
+    general.execute(query)
+    general.commit()
+    return True
+
+
+def __gateway_1_14_0_remove_cognition_step_type_relevance() -> bool:
+    query = """
+    DELETE FROM cognition.strategy_step WHERE step_type = 'RELEVANCE'
+    """
+    general.execute(query)
+    general.commit()
     return True
 
 
