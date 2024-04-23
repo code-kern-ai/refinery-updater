@@ -1,0 +1,3 @@
+#!/bin/bash
+
+docker exec -it refinery-updater sh -c "cd /app && python3 -m pytest -v"
