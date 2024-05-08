@@ -1,10 +1,38 @@
 import os
 import requests
 
-from submodules.model.business_objects import embedding
+from submodules.model.business_objects import embedding, general
 
 
 NEURAL_SEARCH = os.getenv("NEURAL_SEARCH")
+
+
+def neural_search_1_15_0() -> bool:
+    neural_search_1_15_0_delete_all_tf_idf_embeddings()
+    return True
+
+
+def neural_search_1_15_0_delete_all_tf_idf_embeddings() -> bool:
+    # previous tf-idf embeddings didn't do anything useful so we can just delete them
+    # used fixed values instead of enum keys to ensure changes dont break
+    query = "SELECT id FROM embedding WHERE platform = 'python' AND model = 'tf-idf'"
+    embedding_ids = general.execute_all(query)
+    if len(embedding_ids) > 0:
+        url_delete = f"{NEURAL_SEARCH}/delete_collection"
+        for embedding_id in embedding_ids:
+            try:
+                params = {"embedding_id": embedding_id[0]}
+                requests.put(url_delete, params=params)
+            except Exception as e:
+                print(
+                    f"Error deleting tf-idf embedding {embedding_id[0]} from qdrant: {e}"
+                )
+
+        # Note that tensors are deleted by cascading
+        query = "DELETE FROM embedding WHERE platform = 'python' AND model = 'tf-idf'"
+        general.execute(query)
+        general.commit()
+    return True
 
 
 def neural_search_1_12_0() -> bool:
