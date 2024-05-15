@@ -14,6 +14,14 @@ from submodules.model import enums
 def gateway_1_15_0() -> bool:
     # Note: A previous version had the previous update listed as v1.15.
     # That was false, the updates already ran through. This is now for the actual 1.15 release
+    __gateway_1_15_0_add_default_admin_log_level()
+    return True
+
+
+def __gateway_1_15_0_add_default_admin_log_level() -> bool:
+    query = "UPDATE organization SET log_admin_requests = 'NO_GET' WHERE log_admin_requests IS NULL"
+    general.execute(query)
+    general.commit()
     return True
 
 
