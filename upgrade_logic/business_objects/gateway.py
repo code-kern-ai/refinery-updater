@@ -56,6 +56,11 @@ def gateway_1_14_0_add_cognition_strategy_complexity() -> bool:
         )
         return False
 
+    is_managed = get_config_value("is_managed")
+    if not is_managed:
+        print("Not managed. Skipping cognition strategy complexity update.")
+        return False
+
     response = requests.post(
         f"{cognition_url}/api/v1/strategies/internal/calculate_missing_complexities"
     )
