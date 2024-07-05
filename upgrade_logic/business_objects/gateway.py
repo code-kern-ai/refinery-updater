@@ -12,8 +12,6 @@ from submodules.model import enums
 
 
 def gateway_1_16_0() -> bool:
-    # Note: A previous version had the previous update listed as v1.15.
-    # That was false, the updates already ran through. This is now for the actual 1.15 release
     __gateway_1_16_0_add_cognition_project_folder_defaults()
     return True
 
