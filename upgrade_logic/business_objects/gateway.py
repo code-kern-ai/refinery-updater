@@ -14,6 +14,18 @@ from submodules.model import enums
 def gateway_1_16_0() -> bool:
     __gateway_1_16_0_add_cognition_project_folder_defaults()
     __gateway_1_16_0_add_cognition_project_tokenizer_defaults()
+    __gateway_1_16_0_add_metadata_markdown_files_defaults()
+    return True
+
+
+def __gateway_1_16_0_add_metadata_markdown_files_defaults() -> bool:
+    query = """
+    UPDATE cognition.markdown_file
+    SET meta_data = jsonb_build_object('extractor', 'pdf2markdown')
+    WHERE meta_data IS NULL
+    """
+    general.execute(query)
+    general.commit()
     return True
 
 
