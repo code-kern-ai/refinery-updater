@@ -13,6 +13,18 @@ from submodules.model import enums
 
 def gateway_1_16_0() -> bool:
     __gateway_1_16_0_add_cognition_project_folder_defaults()
+    __gateway_1_16_0_add_cognition_project_tokenizer_defaults()
+    return True
+
+
+def __gateway_1_16_0_add_cognition_project_tokenizer_defaults() -> bool:
+    query = """
+    UPDATE cognition.project
+    SET tokenizer = 'en_core_web_sm'
+    WHERE tokenizer IS NULL
+    """
+    general.execute(query)
+    general.commit()
     return True
 
 
