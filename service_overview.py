@@ -9,11 +9,9 @@ class Service(Enum):
     ADMIN_DASHBOARD = "ADMIN_DASHBOARD"
     AUTHORIZER = "AUTHORIZER"
     CONFIG = "CONFIG"
-    DOC_OCK = "DOC_OCK"
     EMBEDDER = "EMBEDDER"
     ENTRY = "ENTRY"
     GATEWAY = "GATEWAY"
-    GATEWAY_PROXY = "GATEWAY_PROXY"
     LF_EXEC_ENV = "LF_EXEC_ENV"
     ML_EXEC_ENV = "ML_EXEC_ENV"
     MODEL_PROVIDER = "MODEL_PROVIDER"
@@ -25,7 +23,6 @@ class Service(Enum):
     UPDATER = "UPDATER"
     WEAK_SUPERVISOR = "WEAK_SUPERVISOR"
     WEBSOCKET = "WEBSOCKET"
-    ZERO_SHOT = "ZERO_SHOT"
     UNKNOWN = "UNKNOWN"
 
 
@@ -50,11 +47,6 @@ __service_lookup = {
         "link": "https://github.com/code-kern-ai/refinery-config",
         "public_repo": True,
     },
-    Service.DOC_OCK: {
-        "name": "Doc Ock",
-        "link": "https://github.com/code-kern-ai/refinery-doc-ock",
-        "public_repo": True,
-    },
     Service.EMBEDDER: {
         "name": "Embedder",
         "link": "https://github.com/code-kern-ai/refinery-embedder",
@@ -68,11 +60,6 @@ __service_lookup = {
     Service.GATEWAY: {
         "name": "Gateway",
         "link": "https://github.com/code-kern-ai/refinery-gateway",
-        "public_repo": True,
-    },
-    Service.GATEWAY_PROXY: {
-        "name": "Gateway Proxy",
-        "link": "https://github.com/code-kern-ai/refinery-gateway-proxy",
         "public_repo": True,
     },
     Service.LF_EXEC_ENV: {
@@ -128,11 +115,6 @@ __service_lookup = {
     Service.WEBSOCKET: {
         "name": "Websocket",
         "link": "https://github.com/code-kern-ai/refinery-websocket",
-        "public_repo": True,
-    },
-    Service.ZERO_SHOT: {
-        "name": "Zero Shot",
-        "link": "https://github.com/code-kern-ai/refinery-zero-shot",
         "public_repo": True,
     },
     Service.UNKNOWN: {
