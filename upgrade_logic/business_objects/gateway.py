@@ -11,6 +11,46 @@ from submodules.model.business_objects import (
 from submodules.model import enums
 
 
+def gateway_1_16_0() -> bool:
+    __gateway_1_16_0_add_cognition_project_folder_defaults()
+    __gateway_1_16_0_add_cognition_project_tokenizer_defaults()
+    __gateway_1_16_0_add_metadata_markdown_files_defaults()
+    return True
+
+
+def __gateway_1_16_0_add_metadata_markdown_files_defaults() -> bool:
+    query = """
+    UPDATE cognition.markdown_file
+    SET meta_data = jsonb_build_object('extractor', 'pdf2markdown')
+    WHERE meta_data IS NULL
+    """
+    general.execute(query)
+    general.commit()
+    return True
+
+
+def __gateway_1_16_0_add_cognition_project_tokenizer_defaults() -> bool:
+    query = """
+    UPDATE cognition.project
+    SET tokenizer = 'en_core_web_sm'
+    WHERE tokenizer IS NULL
+    """
+    general.execute(query)
+    general.commit()
+    return True
+
+
+def __gateway_1_16_0_add_cognition_project_folder_defaults() -> bool:
+    query = """
+    UPDATE cognition.project
+    SET max_folder_size_mb = 20
+    WHERE max_folder_size_mb IS NULL
+    """
+    general.execute(query)
+    general.commit()
+    return True
+
+
 def gateway_1_15_0() -> bool:
     # Note: A previous version had the previous update listed as v1.15.
     # That was false, the updates already ran through. This is now for the actual 1.15 release
