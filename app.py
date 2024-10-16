@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from submodules.model.business_objects import general
 import util
 import config_handler
+from submodules.model import session
 
 app = FastAPI()
 
@@ -100,3 +101,5 @@ def update_versions_to_newest() -> responses.PlainTextResponse:
     util.update_versions_to_newest()
     general.remove_and_refresh_session(session_token)
     return responses.PlainTextResponse(status_code=status.HTTP_200_OK)
+
+session.start_session_cleanup_thread()
