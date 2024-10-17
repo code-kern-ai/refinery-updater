@@ -40,6 +40,7 @@ def version_overview() -> List[Dict[str, str]]:
             "last_checked": x.last_checked,
         }
         for x in current_version
+        if Service.__members__.get(x.service) is not None
     ]
 
 
