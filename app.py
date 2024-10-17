@@ -1,4 +1,3 @@
-from typing import List, Dict
 from fastapi import FastAPI, responses, status
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
@@ -101,5 +100,6 @@ def update_versions_to_newest() -> responses.PlainTextResponse:
     util.update_versions_to_newest()
     general.remove_and_refresh_session(session_token)
     return responses.PlainTextResponse(status_code=status.HTTP_200_OK)
+
 
 session.start_session_cleanup_thread()
