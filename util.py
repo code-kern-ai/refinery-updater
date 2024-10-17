@@ -3,6 +3,7 @@ from upgrade_logic.business_objects import initial_db_version
 from typing import Any, List, Dict, Union
 
 from submodules.model.business_objects import app_version, general
+from submodules.model.enums import try_parse_enum_value
 from service_overview import Service, check_db_uptodate, get_services_info
 import git
 from upgrade_logic import base_logic
@@ -91,7 +92,7 @@ def check_has_newer_version() -> bool:
     lookup_dict = get_services_info(True)
     diff_version = False
     for db_entry in current_version:
-        x = Service[db_entry.service]
+        x = try_parse_enum_value(db_entry.service, Service, False)
         if x in lookup_dict:
             link = lookup_dict[x]["link"]
             remote_version = __last_tag(link)
@@ -123,7 +124,7 @@ def __last_tag(repo_link: str) -> Any:
         if tag[0] == "v":
             return tag[1:]
         return tag
-    except Exception as e:
+    except Exception:
         return "0.0.0"
 
 
