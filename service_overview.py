@@ -42,11 +42,6 @@ __service_lookup = {
         "link": "https://github.com/code-kern-ai/refinery-authorizer",
         "public_repo": True,
     },
-    Service.CONFIG: {
-        "name": "Config",
-        "link": "https://github.com/code-kern-ai/refinery-config",
-        "public_repo": True,
-    },
     Service.EMBEDDER: {
         "name": "Embedder",
         "link": "https://github.com/code-kern-ai/refinery-embedder",
