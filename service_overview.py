@@ -15,7 +15,6 @@ class Service(Enum):
     ML_EXEC_ENV = "ML_EXEC_ENV"
     MODEL_PROVIDER = "MODEL_PROVIDER"
     NEURAL_SEARCH = "NEURAL_SEARCH"
-    REFINERY = "REFINERY"
     TOKENIZER = "TOKENIZER"
     UI = "UI"
     UPDATER = "UPDATER"
@@ -73,11 +72,6 @@ __service_lookup = {
     Service.NEURAL_SEARCH: {
         "name": "Neural Search",
         "link": "https://github.com/code-kern-ai/refinery-neural-search",
-        "public_repo": True,
-    },
-    Service.REFINERY: {
-        "name": "Refinery",
-        "link": "https://github.com/code-kern-ai/refinery",
         "public_repo": True,
     },
     Service.TOKENIZER: {
