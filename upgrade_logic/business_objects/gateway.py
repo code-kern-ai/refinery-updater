@@ -1,7 +1,6 @@
 import os
 import re
 import requests
-from config_handler import get_config_value
 from submodules.model.business_objects import (
     attribute,
     embedding,
@@ -96,11 +95,6 @@ def gateway_1_14_0_add_cognition_strategy_complexity() -> bool:
         )
         return False
 
-    is_managed = get_config_value("is_managed")
-    if not is_managed:
-        print("Not managed. Skipping cognition strategy complexity update.")
-        return False
-
     response = requests.post(
         f"{cognition_url}/api/v1/strategies/internal/calculate_missing_complexities"
     )
@@ -191,15 +185,9 @@ def gateway_1_8_1() -> bool:
 
 
 def __gateway_1_8_1_add_organization_limits() -> bool:
-    is_managed = get_config_value("is_managed")
-    if is_managed:
-        max_rows = 50000
-        max_cols = 25
-        max_char_count = 100000
-    else:
-        max_rows = get_config_value("max_rows") or 50000
-        max_cols = get_config_value("max_cols") or 25
-        max_char_count = get_config_value("max_char_count") or 100000
+    max_rows = 50000
+    max_cols = 25
+    max_char_count = 100000
 
     print(
         "Add default limit for organizations",
