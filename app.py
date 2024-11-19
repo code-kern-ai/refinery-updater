@@ -3,7 +3,6 @@ from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from submodules.model.business_objects import general
 import util
-import config_handler
 from submodules.model import session
 
 app = FastAPI()
@@ -72,12 +71,6 @@ def helper_function(function_name: str) -> responses.JSONResponse:
         status_code=status.HTTP_200_OK,
         content=return_value,
     )
-
-
-@app.put("/config_changed")
-def config_changed() -> responses.PlainTextResponse:
-    config_handler.refresh_config()
-    return responses.PlainTextResponse(status_code=status.HTTP_200_OK)
 
 
 @app.get("/healthcheck")
