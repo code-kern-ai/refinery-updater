@@ -24,7 +24,7 @@ docker stop refinery-updater > /dev/null 2>&1
 echo -ne '\t [done]\n'
 
 echo -ne 'building container...'
-docker build -t refinery-updater-dev -f dev.Dockerfile . > /dev/null 2>&1
+docker build -t refinery-updater-dev -f dev.Dockerfile .
 echo -ne '\t\t [done]\n'
 
 echo -ne 'starting...'
