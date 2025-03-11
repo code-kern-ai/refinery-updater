@@ -19,7 +19,7 @@ def __gateway_1_19_0_add_organization_default_token_limit() -> bool:
     query = """
     UPDATE organization
     SET token_limit = jsonb_build_object(
-        'file_upload_limit', 50, 
+        'file_upload_limit', 50,
         'file_upload_interval', 3600
     )
     WHERE token_limit IS NULL
