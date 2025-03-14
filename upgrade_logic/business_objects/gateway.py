@@ -10,6 +10,25 @@ from submodules.model.business_objects import (
 from submodules.model import enums
 
 
+def gateway_1_19_0() -> bool:
+    __gateway_1_19_0_add_organization_default_token_limit()
+    return True
+
+
+def __gateway_1_19_0_add_organization_default_token_limit() -> bool:
+    query = """
+    UPDATE organization
+    SET token_limit = jsonb_build_object(
+        'file_upload_limit', 50,
+        'file_upload_interval', 3600
+    )
+    WHERE token_limit IS NULL
+    """
+    general.execute(query)
+    general.commit()
+    return True
+
+
 def gateway_1_16_0() -> bool:
     __gateway_1_16_0_add_cognition_project_folder_defaults()
     __gateway_1_16_0_add_cognition_project_tokenizer_defaults()
