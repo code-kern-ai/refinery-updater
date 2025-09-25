@@ -11,7 +11,7 @@ from submodules.model import telemetry
 
 OTLP_GRPC_ENDPOINT = os.getenv("OTLP_GRPC_ENDPOINT", "tempo:4317")
 
-app_name = "refinery-tokenizer"
+app_name = "refinery-updater"
 app = FastAPI(title=app_name)
 
 if telemetry.ENABLE_TELEMETRY:
