@@ -5,8 +5,7 @@ from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from submodules.model.business_objects import general
 import util
-from submodules.model import session
-from submodules.model import telemetry
+from submodules.model import session, telemetry
 
 
 OTLP_GRPC_ENDPOINT = os.getenv("OTLP_GRPC_ENDPOINT", "tempo:4317")
