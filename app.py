@@ -1,11 +1,29 @@
+import os
+import logging
 from fastapi import FastAPI, responses, status
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from submodules.model.business_objects import general
 import util
-from submodules.model import session
+from submodules.model import session, telemetry
 
-app = FastAPI()
+
+OTLP_GRPC_ENDPOINT = os.getenv("OTLP_GRPC_ENDPOINT", "tempo:4317")
+
+app_name = "refinery-updater"
+app = FastAPI(title=app_name)
+
+if telemetry.ENABLE_TELEMETRY:
+    print("WARNING:  Running telemetry.", flush=True)
+    telemetry.setting_app_name(app_name)
+    telemetry.setting_otlp(app, app_name=app_name, endpoint=OTLP_GRPC_ENDPOINT)
+    app.add_middleware(telemetry.PrometheusMiddleware, app_name=app_name)
+    app.add_route("/metrics", telemetry.metrics)
+
+    # Filter out /metrics
+    logging.getLogger("uvicorn.access").addFilter(
+        lambda record: "GET /metrics" not in record.getMessage()
+    )
 
 
 @app.post("/update_to_newest")
