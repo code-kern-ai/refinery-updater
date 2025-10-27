@@ -10,6 +10,21 @@ from submodules.model.business_objects import (
 from submodules.model import enums
 
 
+def gateway_1_22_0() -> bool:
+    __gateway_1_22_0_update_incognito_mode_conversations()
+    return True
+
+
+def __gateway_1_22_0_update_incognito_mode_conversations() -> bool:
+    query = """
+    UPDATE cognition.conversation
+    SET incognito_mode = FALSE
+    WHERE incognito_mode IS NULL
+    """
+    general.execute(query)
+    general.commit()
+    return True
+
 def gateway_1_19_0() -> bool:
     __gateway_1_19_0_add_organization_default_token_limit()
     return True
