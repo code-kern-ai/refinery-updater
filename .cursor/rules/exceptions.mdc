@@ -1,0 +1,112 @@
+---
+description: Rules for exception handling and custom exceptions
+globs: ["**/*.py"]
+alwaysApply: true
+---
+
+# Exceptions Guidelines
+
+## Exception Locations
+
+**Submodule exceptions:**
+```python
+from submodules.model.exceptions import EntityNotFoundException, EntityAlreadyExistsException
+```
+
+**Standard Python exceptions:**
+- `ValueError`: Invalid input values
+- `Exception`: Generic exceptions (use sparingly)
+
+## Usage Patterns
+
+**Raising exceptions:**
+```python
+# Validation
+if not version:
+    raise ValueError("Version is required")
+
+# Version format validation
+def is_newer(v1: str, v2: str) -> bool:
+    a = [__get_int_from_string(x) for x in v1.split(".")]
+    b = [__get_int_from_string(x) for x in v2.split(".")]
+    if len(a) != len(b) and len(a) != 3:
+        raise Exception("invalid version format")
+    return __is_newer_int(a, b)
+```
+
+**Handling in routes:**
+```python
+@app.post("/endpoint")
+def endpoint():
+    session_token = general.get_ctx_token()
+    try:
+        result = util.some_operation()
+        return responses.JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=jsonable_encoder(result),
+        )
+    except ValueError as e:
+        return responses.PlainTextResponse(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            content=f"Invalid input: {str(e)}",
+        )
+    except Exception as e:
+        print(f"Error: {e}", flush=True)
+        return responses.PlainTextResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content=f"Error: {str(e)}",
+        )
+    finally:
+        general.remove_and_refresh_session(session_token)
+```
+
+**Handling in utility functions:**
+```python
+def __last_tag(repo_link: str) -> str:
+    try:
+        g = git.cmd.Git()
+        blob = g.ls_remote(repo_link, sort="-v:refname", tags=True)
+        if len(blob) == 0:
+            return "0.0.0"
+        tag = blob.split("\n")[0].split("/")[-1]
+        if tag[0] == "v":
+            return tag[1:]
+        return tag
+    except Exception:
+        # Return safe default instead of raising
+        return "0.0.0"
+```
+
+**Handling in upgrade functions:**
+```python
+def gateway_1_14_0_add_cognition_strategy_complexity() -> bool:
+    cognition_url = os.getenv("COGNITION_GATEWAY")
+    if not cognition_url:
+        print("No cognition gateway url found. Skipping...")
+        return False  # Return False instead of raising
+    
+    try:
+        response = requests.post(f"{cognition_url}/api/v1/strategies/internal/...")
+        if response.status_code != 200:
+            print(f"Failed to update. Status code: {response.status_code}")
+            return False
+        return True
+    except Exception as e:
+        print(f"Error calling external service: {e}", flush=True)
+        return False
+```
+
+## HTTP Status Code Mapping
+
+- `400`: `ValueError` - Invalid input parameters
+- `500`: `Exception` - Unexpected errors
+
+## Best Practices
+
+1. **Return False for failures**: Upgrade functions should return `False` instead of raising exceptions
+2. **Safe defaults**: Return safe default values (e.g., `"0.0.0"` for version) when operations fail
+3. **Log errors**: Use `print()` with `flush=True` to log errors and important information
+4. **Handle external calls**: Always handle exceptions from external service calls gracefully
+5. **Validate inputs**: Use `ValueError` for invalid input validation
+6. **Don't swallow silently**: Log errors even when returning safe defaults
+7. **Session cleanup**: Always use `finally` blocks to ensure session cleanup even on exceptions

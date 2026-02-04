@@ -1,0 +1,82 @@
+---
+description: Main guidelines and architecture overview for refinery-updater
+alwaysApply: true
+---
+
+# Refinery Updater Guidelines
+
+Updater service guidelines ensuring consistency across API routes, upgrade logic, and migration functions.
+
+## Overview
+
+The `refinery-updater` is a FastAPI-based service that manages version updates and migration logic for the Refinery platform. It checks for newer versions of Refinery services, executes upgrade functions between versions, and handles database migrations.
+
+## Architecture
+
+The updater follows a simple, focused architecture:
+
+- **FastAPI App** (`app.py`): HTTP endpoint definitions and request/response handling
+- **Business Logic** (`util.py`): Version checking, update orchestration, and service management
+- **Upgrade Logic** (`upgrade_logic/`): Version-specific migration functions organized by service
+- **Submodules** (`submodules/`): Shared modules for models and S3 operations
+- **Database** (`db.py`): Direct database queries for specific operations
+- **Service Overview** (`service_overview.py`): Service metadata and version checking configuration
+
+## Guideline Files
+
+- **[submodules.mdc](./submodules.mdc)** - Rules for working with Git submodules (model and s3)
+- **[fastapi-routes.mdc](./fastapi-routes.mdc)** - Rules for FastAPI route definitions in app.py
+- **[upgrade-logic.mdc](./upgrade-logic.mdc)** - Rules for migration functions and upgrade patterns
+- **[exceptions.mdc](./exceptions.mdc)** - Rules for exception handling and error patterns
+- **[api-models.mdc](./api-models.mdc)** - Rules for Pydantic models and request/response validation
+- **[utilities.mdc](./utilities.mdc)** - Rules for utility functions in util.py
+- **[middleware.mdc](./middleware.mdc)** - Rules for database session management
+
+## General Principles
+
+1. **Simplicity**: Keep routes thin, business logic in `util.py`, migrations in `upgrade_logic/`
+2. **Type Safety**: Use type hints consistently, leverage Pydantic for request validation
+3. **Version Management**: Follow semantic versioning (x.y.z) for upgrade functions
+4. **Idempotency**: Upgrade functions should be safe to run multiple times
+5. **Error Handling**: Use appropriate HTTP status codes and clear error messages
+6. **Submodule Integration**: Always check submodule rules before making changes to submodule code
+7. **Session Management**: Always manage database sessions with `get_ctx_token()` and `remove_and_refresh_session()`
+
+## Directory Structure
+
+```
+refinery-updater/
+├── app.py                 # FastAPI application with routes
+├── util.py                # Business logic for version management
+├── db.py                  # Direct database queries
+├── service_overview.py    # Service metadata and configuration
+├── upgrade_logic/         # Migration functions
+│   ├── base_logic.py      # Core upgrade orchestration
+│   ├── business_objects/  # Service-specific upgrade functions
+│   │   ├── gateway.py     # Gateway service migrations
+│   │   ├── neural_search.py
+│   │   └── ...
+│   └── pre_redesign/      # Legacy migration logic
+├── submodules/            # Git submodules
+│   ├── model/             # Database models and business objects
+│   └── s3/                # S3 storage operations
+├── tests/                 # Test files
+└── requirements/          # Python dependencies
+```
+
+## Quick Reference
+
+**Response Patterns**: Use `responses.PlainTextResponse()` for text, `responses.JSONResponse()` for JSON. Use `jsonable_encoder()` for JSON serialization.
+
+**Session Management**: Always wrap database operations:
+```python
+session_token = general.get_ctx_token()
+# ... database operations ...
+general.remove_and_refresh_session(session_token)
+```
+
+**Upgrade Functions**: Name functions as `{service}_{version}()` (e.g., `gateway_1_19_0()`). Functions should return `bool` indicating success.
+
+**Database**: Use submodule business objects (`submodules.model.business_objects`) for most operations. Use `db.py` only for specific queries not covered by business objects.
+
+**Submodules**: Always check `submodules/{name}/.cursor/rules/` before modifying submodule code.

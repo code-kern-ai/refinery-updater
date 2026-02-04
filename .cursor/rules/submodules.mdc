@@ -1,0 +1,77 @@
+---
+description: Rules for working with Git submodules (model and s3)
+alwaysApply: true
+---
+
+# Submodules Guidelines
+
+## Critical Rule
+
+**BEFORE modifying code in `submodules/`, check the submodule's `.cursor/rules/` directory first.**
+
+- `submodules/model/.cursor/rules/` - Database models, business objects, enums, database operations
+- `submodules/s3/.cursor/rules/` - S3 storage operations
+
+Do NOT duplicate submodule rules in parent repository rules.
+
+## Import Patterns
+
+**From model submodule:**
+```python
+from submodules.model.business_objects import app_version, general, user, attribute, embedding
+from submodules.model import enums
+from submodules.model.enums import try_parse_enum_value
+from submodules.model.exceptions import EntityNotFoundException
+```
+
+**From S3 submodule:**
+```python
+from submodules.s3 import controller as s3
+s3.put_object(bucket, object_name, data)
+s3.get_object(bucket, object_name)
+```
+
+## When to Modify Submodules
+
+**Modify when**: Adding data layer logic, new database operations, new S3 operations.
+
+**Don't modify when**: Change belongs in updater code (routes/util), just using existing functionality.
+
+## Database Schema Changes
+
+**When adding new tables or columns** in `submodules/model`:
+
+1. Make changes in `submodules/model/models.py` (add entity class or modify columns)
+2. Update `submodules/model/enums.py` if adding a new table (add to `Tablenames` enum)
+3. Database migrations are typically handled by the refinery-gateway service
+4. For data migrations (not schema changes), use upgrade functions in `upgrade_logic/`
+
+**Important**: Schema changes should be coordinated with the refinery-gateway service which manages Alembic migrations. This service focuses on data migrations through upgrade functions.
+
+**For data migrations**: Use upgrade functions in `upgrade_logic/business_objects/` following the upgrade-logic.mdc guidelines.
+
+## Common Patterns
+
+```python
+# Business objects - version management
+current_version = app_version.get_all()
+for db_entry in current_version:
+    db_entry.remote_version = new_version
+general.commit()
+
+# Business objects - general operations
+users = user.get_all()
+for u in users:
+    if not u.role:
+        u.role = "ENGINEER"
+general.commit()
+
+# Direct SQL execution
+general.execute("UPDATE organization SET ... WHERE ...")
+general.commit()
+
+# S3 operations
+from submodules.s3 import controller as s3
+all_buckets = s3.get_all_buckets()
+s3.transfer_bucket_from_minio_to_aws(bucket_name, remove_from_minio, force_overwrite)
+```
