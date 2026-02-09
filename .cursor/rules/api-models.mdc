@@ -1,0 +1,107 @@
+---
+description: Rules for Pydantic models and request/response validation
+globs: ["app.py"]
+alwaysApply: true
+---
+
+# API Models Guidelines
+
+Pydantic models validate request bodies and ensure type safety. Models are defined directly in `app.py` or imported when needed.
+
+## Model Definition
+
+**Basic structure:**
+```python
+from pydantic import BaseModel
+
+class UpgradeToAWS(BaseModel):
+    only_existing: bool
+    remove_from_minio: bool
+    force_overwrite: bool
+```
+
+## Naming Conventions
+
+- Use descriptive names that reflect the operation: `UpgradeToAWS`, `MigrationRequest`
+- No need for `Body` suffix in this service (simpler naming)
+
+## Usage in Routes
+
+```python
+from pydantic import BaseModel
+
+class UpgradeToAWS(BaseModel):
+    only_existing: bool
+    remove_from_minio: bool
+    force_overwrite: bool
+
+@app.post("/migrate_minio_to_aws")
+def migrate_minio_to_aws(request: UpgradeToAWS) -> int:
+    from upgrade_logic.pre_redesign.upgrade_from_minio_to_aws import upgrade
+    upgrade(
+        request.only_existing, 
+        request.remove_from_minio, 
+        request.force_overwrite
+    )
+    return 0
+```
+
+## Field Types
+
+**Basic types:**
+```python
+from pydantic import BaseModel
+from typing import Optional, List
+
+class MigrationRequest(BaseModel):
+    service_name: str
+    target_version: str
+    dry_run: bool = False  # Default value
+    options: Optional[List[str]] = None  # Optional field
+```
+
+## Field Validation
+
+```python
+from pydantic import BaseModel, Field, field_validator
+
+class UpgradeToAWS(BaseModel):
+    only_existing: bool = Field(description="Only migrate existing organization buckets")
+    remove_from_minio: bool = Field(description="Remove files from MinIO after migration")
+    force_overwrite: bool = Field(default=False, description="Overwrite existing files")
+    
+    @field_validator('only_existing')
+    @classmethod
+    def validate_only_existing(cls, v):
+        if not isinstance(v, bool):
+            raise ValueError('only_existing must be a boolean')
+        return v
+```
+
+## Best Practices
+
+1. **Simple models**: Keep models simple and focused on the request data
+2. **Type hints**: Use proper type hints for all fields
+3. **Defaults**: Provide sensible defaults for optional fields
+4. **Descriptive names**: Use clear, descriptive model names
+5. **Validation**: Add validators when input validation is needed
+6. **Documentation**: Use `Field(description=...)` for API documentation
+7. **Location**: Define models in `app.py` near their usage, or create separate file if many models
+
+## Example: Complete Model with Validation
+
+```python
+from pydantic import BaseModel, Field, field_validator
+
+class VersionUpdateRequest(BaseModel):
+    service: str = Field(description="Service name to update")
+    target_version: Optional[str] = Field(None, description="Target version (defaults to latest)")
+    force: bool = Field(False, description="Force update even if already at version")
+    
+    @field_validator('service')
+    @classmethod
+    def validate_service(cls, v):
+        if not v or not v.strip():
+            raise ValueError('Service name cannot be empty')
+        return v.strip().upper()
+```

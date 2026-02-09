@@ -1,0 +1,73 @@
+---
+description: Rules for database session management
+globs: ["app.py", "util.py", "upgrade_logic/**/*.py"]
+alwaysApply: true
+---
+
+# Session Management Guidelines
+
+Database sessions are managed explicitly using context tokens. This service does not use middleware for session management.
+
+## Session Management Pattern
+
+**In routes (`app.py`):**
+```python
+from submodules.model.business_objects import general
+
+@app.post("/endpoint")
+def endpoint():
+    session_token = general.get_ctx_token()
+    try:
+        # ... database operations ...
+        return responses.JSONResponse(...)
+    finally:
+        general.remove_and_refresh_session(session_token)
+```
+
+**In utility functions (`util.py`):**
+```python
+def version_overview() -> List[Dict[str, str]]:
+    session_token = general.get_ctx_token()
+    try:
+        current_version = app_version.get_all()
+        # ... operations ...
+        return result
+    finally:
+        general.remove_and_refresh_session(session_token)
+```
+
+## Session Cleanup
+
+**Always cleanup sessions:**
+- Use `finally` blocks to ensure cleanup even on exceptions
+- Call `general.remove_and_refresh_session(session_token)` after operations
+- Store the token immediately after `get_ctx_token()` to ensure cleanup
+
+**Pattern:**
+```python
+session_token = general.get_ctx_token()
+try:
+    # All database operations here
+    result = some_operation()
+    return result
+finally:
+    general.remove_and_refresh_session(session_token)
+```
+
+## Session Initialization
+
+The session cleanup thread is started in `app.py`:
+```python
+from submodules.model import session
+
+session.start_session_cleanup_thread()
+```
+
+## Best Practices
+
+1. **Always get context token**: Call `general.get_ctx_token()` at the start of operations
+2. **Always cleanup**: Use `finally` blocks to ensure `remove_and_refresh_session()` is called
+3. **Store token immediately**: Store the token right after getting it
+4. **No direct sessions**: Never create SQLAlchemy sessions directly - use submodule business objects
+5. **Use business objects**: Prefer `submodules.model.business_objects` over raw SQL
+6. **Transaction management**: Use `general.commit()` after modifications

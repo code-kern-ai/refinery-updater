@@ -1,0 +1,178 @@
+---
+description: Rules for upgrade logic and migration functions
+globs: ["upgrade_logic/**/*.py"]
+alwaysApply: true
+---
+
+# Upgrade Logic Guidelines
+
+Upgrade logic contains version-specific migration functions that transform data between Refinery service versions.
+
+## Function Naming Convention
+
+Upgrade functions must follow the pattern: `{service}_{version}()`
+
+**Examples:**
+```python
+def gateway_1_19_0() -> bool:
+    """Upgrade gateway service from any version < 1.19.0 to 1.19.0"""
+    pass
+
+def neural_search_2_5_1() -> bool:
+    """Upgrade neural search service to version 2.5.1"""
+    pass
+```
+
+**Version format**: `{major}_{minor}_{patch}` (e.g., `1_19_0` for version `1.19.0`)
+
+## Function Structure
+
+**Basic pattern:**
+```python
+def gateway_1_19_0() -> bool:
+    """Brief description of what this upgrade does"""
+    __gateway_1_19_0_add_organization_default_token_limit()
+    return True
+
+def __gateway_1_19_0_add_organization_default_token_limit() -> bool:
+    """Private helper function for specific migration step"""
+    query = """
+    UPDATE organization
+    SET token_limit = jsonb_build_object(
+        'file_upload_limit', 50,
+        'file_upload_interval', 3600
+    )
+    WHERE token_limit IS NULL
+    """
+    general.execute(query)
+    general.commit()
+    return True
+```
+
+## Best Practices
+
+1. **Idempotency**: Functions should be safe to run multiple times
+   - Use `WHERE` clauses to check conditions before updating
+   - Check if data already exists before inserting
+
+2. **Atomicity**: Group related changes in a single function
+   - Use transactions (`general.commit()`) appropriately
+   - Return `False` if any step fails
+
+3. **Helper Functions**: Use private functions (prefixed with `__`) for complex logic
+   - Keep main upgrade function readable
+   - Break down complex migrations into steps
+
+4. **Error Handling**: Always return `bool` indicating success/failure
+   ```python
+   def gateway_1_14_0_add_cognition_strategy_complexity() -> bool:
+       cognition_url = os.getenv("COGNITION_GATEWAY")
+       if not cognition_url:
+           print("No cognition gateway url found. Skipping...")
+           return False
+       
+       response = requests.post(f"{cognition_url}/api/v1/strategies/internal/...")
+       if response.status_code != 200:
+           print(f"Failed to update. Status code: {response.status_code}")
+           return False
+       return True
+   ```
+
+5. **Logging**: Use `print()` with `flush=True` for progress updates
+   ```python
+   print("Adding default limit for organizations", flush=True)
+   # ... migration logic ...
+   print("Added default limit for organizations", flush=True)
+   ```
+
+6. **Database Operations**: Use submodule business objects when possible
+   ```python
+   from submodules.model.business_objects import general, user, attribute
+   
+   # Prefer business objects
+   users = user.get_all()
+   for u in users:
+       if not u.role:
+           u.role = "ENGINEER"
+   general.commit()
+   
+   # Use raw SQL only when necessary
+   general.execute("UPDATE organization SET ... WHERE ...")
+   general.commit()
+   ```
+
+7. **External Service Calls**: Handle missing environment variables gracefully
+   ```python
+   service_url = os.getenv("SERVICE_URL")
+   if not service_url:
+       print("Service URL not found. Skipping...")
+       return False
+   ```
+
+## Version Comparison
+
+The `base_logic.py` module handles version comparison:
+- `is_newer(v1, v2)`: Returns `True` if v1 > v2
+- `loop_functions_between_version()`: Automatically calls all upgrade functions between versions
+
+## Registering Upgrade Functions
+
+Upgrade functions are automatically discovered by `base_logic.py`:
+- Functions must be in `upgrade_logic/business_objects/{service}.py`
+- Functions must match the naming pattern `{service}_{version}()`
+- Functions are registered in `__lookup_upgrade_bo` dictionary in `base_logic.py`
+
+## Migration Patterns
+
+**Adding default values:**
+```python
+def __gateway_1_16_0_add_cognition_project_tokenizer_defaults() -> bool:
+    query = """
+    UPDATE cognition.project
+    SET tokenizer = 'en_core_web_sm'
+    WHERE tokenizer IS NULL
+    """
+    general.execute(query)
+    general.commit()
+    return True
+```
+
+**Bulk data transformation:**
+```python
+def __gateway_1_10_1_add_additional_embedding_information() -> bool:
+    embeddings = embedding.get_all_embeddings()
+    for embedding_item in embeddings:
+        if embedding_item.platform:
+            continue  # Skip already updated
+        # Transform data
+        embedding_item.platform = platform
+        embedding_item.model = model
+        embedding_item.name = name
+    general.commit()
+    return True
+```
+
+**Conditional updates:**
+```python
+def __gateway_1_6_1_add_attribute_visibility() -> bool:
+    (count,) = general.execute(
+        "SELECT COUNT(id) FROM attribute WHERE visibility IS NULL"
+    ).first()
+    
+    if count > 0:
+        general.execute(
+            "UPDATE attribute SET visibility = '...' WHERE visibility IS NULL"
+        )
+        general.commit()
+        print(f"Set value to {count} attributes.", flush=True)
+    else:
+        print("Nothing changed", flush=True)
+    return True
+```
+
+## Testing Upgrades
+
+- Test upgrade functions independently
+- Verify idempotency by running functions multiple times
+- Check that data transformations are correct
+- Ensure rollback scenarios are handled (if applicable)

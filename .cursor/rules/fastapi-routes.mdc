@@ -1,0 +1,167 @@
+---
+description: Rules for FastAPI route definitions and HTTP handling
+globs: ["app.py"]
+alwaysApply: true
+---
+
+# FastAPI Routes Guidelines
+
+Routes handle HTTP request/response logic. Keep routes thin - validate input, call utility functions, format responses.
+
+## Route Structure
+
+Routes are defined directly in `app.py`:
+
+```python
+from fastapi import FastAPI, responses, status
+from fastapi.encoders import jsonable_encoder
+from submodules.model.business_objects import general
+import util
+
+app = FastAPI(title="refinery-updater")
+
+@app.post("/update_to_newest")
+def update_to_newest() -> responses.PlainTextResponse:
+    session_token = general.get_ctx_token()
+    if util.update_to_newest():
+        msg = "updated to current version"
+    else:
+        msg = "nothing to update"
+    general.remove_and_refresh_session(session_token)
+    return responses.PlainTextResponse(status_code=status.HTTP_200_OK, content=msg)
+```
+
+## Response Patterns
+
+**Plain text responses:**
+```python
+@app.post("/update_to_newest")
+def update_to_newest() -> responses.PlainTextResponse:
+    # ... logic ...
+    return responses.PlainTextResponse(
+        status_code=status.HTTP_200_OK, 
+        content="updated to current version"
+    )
+```
+
+**JSON responses:**
+```python
+@app.get("/version_overview")
+def version_overview() -> responses.JSONResponse:
+    session_token = general.get_ctx_token()
+    return_values = util.version_overview()
+    general.remove_and_refresh_session(session_token)
+    return responses.JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=jsonable_encoder(return_values),
+    )
+```
+
+**Conditional response types:**
+```python
+@app.get("/has_updates")
+def has_updates(as_html_response: bool = False) -> responses.JSONResponse:
+    session_token = general.get_ctx_token()
+    return_value = util.has_updates()
+    general.remove_and_refresh_session(session_token)
+    if as_html_response:
+        return responses.HTMLResponse(content=str(return_value))
+    return responses.JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=return_value,
+    )
+```
+
+## Session Management
+
+**Always manage database sessions:**
+```python
+@app.post("/endpoint")
+def endpoint():
+    session_token = general.get_ctx_token()
+    try:
+        # ... database operations ...
+        return responses.JSONResponse(...)
+    finally:
+        general.remove_and_refresh_session(session_token)
+```
+
+## Request Body Models
+
+Use Pydantic models for request validation:
+
+```python
+from pydantic import BaseModel
+
+class UpgradeToAWS(BaseModel):
+    only_existing: bool
+    remove_from_minio: bool
+    force_overwrite: bool
+
+@app.post("/migrate_minio_to_aws")
+def migrate_minio_to_aws(request: UpgradeToAWS) -> int:
+    from upgrade_logic.pre_redesign.upgrade_from_minio_to_aws import upgrade
+    upgrade(request.only_existing, request.remove_from_minio, request.force_overwrite)
+    return 0
+```
+
+## Query Parameters
+
+```python
+@app.get("/has_updates")
+def has_updates(as_html_response: bool = False) -> responses.JSONResponse:
+    # Query parameter with default value
+    pass
+```
+
+## Health Check Pattern
+
+```python
+@app.get("/healthcheck")
+def healthcheck() -> responses.PlainTextResponse:
+    text = ""
+    status_code = status.HTTP_200_OK
+    database_test = general.test_database_connection()
+    if not database_test.get("success"):
+        error_name = database_test.get("error")
+        text += f"database_error:{error_name}:"
+        status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    if not text:
+        text = "OK"
+    return responses.PlainTextResponse(text, status_code=status_code)
+```
+
+## Error Handling
+
+Handle errors gracefully and return appropriate status codes:
+
+```python
+@app.post("/endpoint")
+def endpoint():
+    session_token = general.get_ctx_token()
+    try:
+        result = util.some_operation()
+        return responses.JSONResponse(
+            status_code=status.HTTP_200_OK,
+            content=jsonable_encoder(result),
+        )
+    except Exception as e:
+        print(f"Error: {e}", flush=True)
+        return responses.PlainTextResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content=f"Error: {str(e)}",
+        )
+    finally:
+        general.remove_and_refresh_session(session_token)
+```
+
+## Best Practices
+
+1. **Keep routes thin**: Delegate business logic to `util.py` or `upgrade_logic/`
+2. **Session management**: Always use `get_ctx_token()` and `remove_and_refresh_session()`
+3. **Type hints**: Use return type annotations (`-> responses.PlainTextResponse`)
+4. **Status codes**: Use appropriate HTTP status codes from `status` module
+5. **JSON encoding**: Use `jsonable_encoder()` for complex objects
+6. **Error handling**: Handle exceptions and return appropriate error responses
+7. **Route naming**: Use snake_case for route paths: `/update_to_newest`, `/version_overview`
+8. **Health checks**: Include health check endpoints that test critical dependencies

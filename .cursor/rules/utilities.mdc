@@ -1,0 +1,147 @@
+---
+description: Rules for utility functions and business logic
+globs: ["util.py"]
+alwaysApply: true
+---
+
+# Utilities Guidelines
+
+The `util.py` module contains the core business logic for version management and update orchestration.
+
+## Core Functions
+
+**Version overview:**
+```python
+def version_overview() -> List[Dict[str, str]]:
+    """Returns list of services with version information"""
+    session_token = general.get_ctx_token()
+    try:
+        current_version = app_version.get_all()
+        # ... logic ...
+        return result
+    finally:
+        general.remove_and_refresh_session(session_token)
+```
+
+**Update operations:**
+```python
+def update_to_newest() -> bool:
+    """Updates all services to their newest versions"""
+    something_updated = False
+    session_token = general.get_ctx_token()
+    try:
+        # ... update logic ...
+        if something_updated:
+            general.commit()
+        return something_updated
+    finally:
+        general.remove_and_refresh_session(session_token)
+```
+
+**Version checking:**
+```python
+def has_updates() -> bool:
+    """Checks if any services have newer versions available"""
+    if not check_db_uptodate():
+        check_has_newer_version()
+    current_version = app_version.get_all()
+    return any(
+        __remote_has_newer(db_entry.installed_version, db_entry.remote_version)
+        for db_entry in current_version
+    )
+```
+
+## Import Patterns
+
+```python
+from submodules.model.business_objects import app_version, general
+from submodules.model.enums import try_parse_enum_value
+from upgrade_logic import base_logic
+from service_overview import Service, check_db_uptodate, get_services_info
+import git
+```
+
+## Session Management
+
+**Always manage sessions:**
+```python
+def function_name():
+    session_token = general.get_ctx_token()
+    try:
+        # ... operations ...
+        return result
+    finally:
+        general.remove_and_refresh_session(session_token)
+```
+
+## Version Comparison
+
+**Use base_logic for version operations:**
+```python
+from upgrade_logic import base_logic
+
+# Check if version is newer
+is_newer = base_logic.is_newer(remote_version, installed_version)
+
+# Execute upgrade functions between versions
+base_logic.loop_functions_between_version(
+    service_name.lower(),
+    current_version,
+    target_version,
+)
+```
+
+## Git Operations
+
+**Fetching remote tags:**
+```python
+import git
+
+def __last_tag(repo_link: str) -> str:
+    try:
+        g = git.cmd.Git()
+        blob = g.ls_remote(repo_link, sort="-v:refname", tags=True)
+        if len(blob) == 0:
+            return "0.0.0"
+        tag = blob.split("\n")[0].split("/")[-1]
+        if tag[0] == "v":
+            return tag[1:]
+        return tag
+    except Exception:
+        return "0.0.0"
+```
+
+## Helper Functions
+
+**Private helpers (prefixed with `__`):**
+```python
+def __remote_has_newer(installed: str, remote: Union[str, None]) -> bool:
+    """Check if remote version is newer than installed"""
+    if remote is None:
+        return False
+    return base_logic.is_newer(remote, installed)
+
+def check_if_version_exists(installed: str, remote: str, is_remote: bool) -> str:
+    """Return version string or 'unknown' if version is 0.0.0"""
+    if "0.0.0" in [installed, remote]:
+        return "unknown"
+    return remote if is_remote else installed
+```
+
+## Best Practices
+
+1. **Session management**: Always use `get_ctx_token()` and `remove_and_refresh_session()`
+2. **Type hints**: Use explicit return types for all functions
+3. **Error handling**: Handle exceptions gracefully, return appropriate defaults
+4. **Database commits**: Call `general.commit()` after modifications
+5. **Private helpers**: Use `__` prefix for internal helper functions
+6. **Idempotency**: Functions should be safe to call multiple times
+7. **Logging**: Use `print()` with `flush=True` for important operations
+8. **Version format**: Handle both `v1.2.3` and `1.2.3` tag formats
+
+## Function Responsibilities
+
+- **Version management**: Check versions, compare, update database
+- **Update orchestration**: Coordinate upgrade function execution
+- **Service metadata**: Work with `service_overview.py` for service information
+- **Git operations**: Fetch remote tags and version information
