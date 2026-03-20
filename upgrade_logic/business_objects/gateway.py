@@ -49,10 +49,10 @@ def __gateway_1_16_0_add_metadata_markdown_files_defaults() -> bool:
 
 def __gateway_1_16_0_add_cognition_project_tokenizer_defaults() -> bool:
     query = """
-     UPDATE cognition.project
-     SET tokenizer = 'en_core_web_sm'
-     WHERE tokenizer IS NULL
-     """
+    UPDATE cognition.project
+    SET tokenizer = 'en_core_web_sm'
+    WHERE tokenizer IS NULL
+    """
     general.execute(query)
     general.commit()
     return True
