@@ -1,3 +1,2 @@
 -r common-requirements.txt
 GitPython==3.1.42
-pydantic==2.7.4
